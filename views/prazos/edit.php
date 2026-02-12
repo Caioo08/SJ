@@ -28,5 +28,18 @@ input,select,textarea{width:100%;padding:11px;border-radius:8px;background:#1414
 <label>Prioridade</label><select name="prioridade"><option value="baixa" <?= $prazo['prioridade']==='baixa'?'selected':'' ?>>Baixa</option><option value="media" <?= $prazo['prioridade']==='media'?'selected':'' ?>>Média</option><option value="alta" <?= $prazo['prioridade']==='alta'?'selected':'' ?>>Alta</option></select>
 <label>Descrição</label><textarea name="descricao" rows="4"><?= htmlspecialchars($prazo['descricao']) ?></textarea>
 <div class="actions"><button class="btn" type="submit">Atualizar</button><a class="btn btn-outline" href="/prazos">Cancelar</a></div>
-</form></div></main>
+</form></div>
+<?php if (!empty($historico ?? [])): ?>
+<div class="wrap" style="margin-top:16px;">
+  <h2 style="margin-top:0;">🕘 Histórico de Alterações</h2>
+  <?php foreach(($historico ?? []) as $h): ?>
+    <div style="border:1px solid var(--bd);border-radius:8px;padding:10px;margin-bottom:8px;">
+      <div class="meta"><strong><?= htmlspecialchars($h['alteracao']) ?></strong> · <?= date('d/m/Y H:i', strtotime($h['criado_em'])) ?> · <?= htmlspecialchars($h['usuario_nome'] ?? 'Usuário') ?></div>
+      <?php if(!empty($h['antes_json'])): ?><div class="meta">Antes: <?= htmlspecialchars($h['antes_json']) ?></div><?php endif; ?>
+      <?php if(!empty($h['depois_json'])): ?><div class="meta">Depois: <?= htmlspecialchars($h['depois_json']) ?></div><?php endif; ?>
+    </div>
+  <?php endforeach; ?>
+</div>
+<?php endif; ?>
+</main>
 </body></html>

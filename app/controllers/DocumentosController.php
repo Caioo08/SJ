@@ -1,6 +1,7 @@
 <?php
 
 require_once '../config/database.php';
+require_once '../app/helpers/Audit.php';
 
 class DocumentosController
 {
@@ -108,6 +109,7 @@ class DocumentosController
                 ':caminho' => $caminhoCompleto
             ]);
 
+            Audit::registrar('Documento enviado', 'documentos', (int) $pdo->lastInsertId(), 'Arquivo: ' . $arquivo['name']);
             header('Location: /documentos');
             exit;
 
@@ -176,6 +178,8 @@ class DocumentosController
 
         $stmt = $pdo->prepare("DELETE FROM documentos WHERE id = ? AND usuario_id = ?");
         $stmt->execute([$id, $usuario_id]);
+
+        Audit::registrar('Documento excluído', 'documentos', (int) $id, 'Arquivo: ' . ($documento['nome_original'] ?? ''));
 
         header('Location: /documentos');
         exit;

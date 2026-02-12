@@ -254,14 +254,37 @@ class AdminController
         self::verificarAdmin();
         global $pdo;
 
+        $acaoFiltro = trim($_GET['acao'] ?? '');
+        $periodoFiltro = $_GET['periodo'] ?? '7d';
+
+        $where = [];
+        $params = [];
+
+        if ($acaoFiltro !== '') {
+            $where[] = 'l.acao LIKE :acao';
+            $params[':acao'] = '%' . $acaoFiltro . '%';
+        }
+
+        if ($periodoFiltro === '24h') {
+            $where[] = 'l.criado_em >= DATE_SUB(NOW(), INTERVAL 1 DAY)';
+        } elseif ($periodoFiltro === '30d') {
+            $where[] = 'l.criado_em >= DATE_SUB(NOW(), INTERVAL 30 DAY)';
+        } else {
+            $where[] = 'l.criado_em >= DATE_SUB(NOW(), INTERVAL 7 DAY)';
+            $periodoFiltro = '7d';
+        }
+
+        $sqlWhere = $where ? ('WHERE ' . implode(' AND ', $where)) : '';
+
         $stmt = $pdo->prepare("
             SELECT l.*, u.nome as usuario_nome
             FROM logs_auditoria l
             LEFT JOIN usuarios u ON l.usuario_id = u.id
+            {$sqlWhere}
             ORDER BY l.criado_em DESC
-            LIMIT 100
+            LIMIT 200
         ");
-        $stmt->execute();
+        $stmt->execute($params);
         $logs = $stmt->fetchAll();
 
         require_once '../views/admin/logs.php';

@@ -1,6 +1,7 @@
 <?php
 
 require_once '../config/database.php';
+require_once '../app/helpers/Audit.php';
 
 class PrazosController
 {
@@ -129,6 +130,15 @@ class PrazosController
             ':prioridade' => $prioridade,
         ]);
 
+        $prazoId = (int) $pdo->lastInsertId();
+        self::registrarHistorico($prazoId, $usuario_id, 'Prazo criado', null, [
+            'titulo' => $titulo,
+            'data_limite' => $data_limite,
+            'prioridade' => $prioridade,
+            'processo_id' => $processo_id,
+        ]);
+        Audit::registrar('Prazo criado', 'prazos', $prazoId, 'Título: ' . $titulo);
+
         header('Location: /prazos?msg=criado');
         exit;
     }
@@ -155,6 +165,14 @@ class PrazosController
         $stmt = $pdo->prepare('SELECT id, numero_processo, cliente_nome FROM processos WHERE usuario_id = ? ORDER BY criado_em DESC');
         $stmt->execute([$usuario_id]);
         $processos = $stmt->fetchAll();
+
+        try {
+            $stmt = $pdo->prepare('SELECT ph.*, u.nome as usuario_nome FROM prazo_historico ph LEFT JOIN usuarios u ON ph.usuario_id = u.id WHERE ph.prazo_id = ? ORDER BY ph.criado_em DESC LIMIT 15');
+            $stmt->execute([$id]);
+            $historico = $stmt->fetchAll();
+        } catch (PDOException $e) {
+            $historico = [];
+        }
 
         require_once '../views/prazos/edit.php';
     }
@@ -194,6 +212,14 @@ class PrazosController
 
         self::validarProcessoDoUsuario($processo_id, $usuario_id, $pdo);
 
+        $stmt = $pdo->prepare('SELECT titulo, descricao, data_limite, prioridade, processo_id FROM prazos WHERE id = ? AND usuario_id = ?');
+        $stmt->execute([$id, $usuario_id]);
+        $prazoAntes = $stmt->fetch();
+
+        if (!$prazoAntes) {
+            die('Prazo não encontrado.');
+        }
+
         $stmt = $pdo->prepare('UPDATE prazos
             SET processo_id = :processo_id,
                 titulo = :titulo,
@@ -212,6 +238,15 @@ class PrazosController
             ':id' => $id,
             ':usuario_id' => $usuario_id,
         ]);
+
+        self::registrarHistorico($id, $usuario_id, 'Prazo atualizado', $prazoAntes, [
+            'titulo' => $titulo,
+            'descricao' => $descricao,
+            'data_limite' => $data_limite,
+            'prioridade' => $prioridade,
+            'processo_id' => $processo_id,
+        ]);
+        Audit::registrar('Prazo atualizado', 'prazos', (int) $id, 'Título: ' . $titulo);
 
         header('Location: /prazos?msg=atualizado');
         exit;
@@ -240,6 +275,9 @@ class PrazosController
         $stmt = $pdo->prepare('UPDATE prazos SET concluido = ?, atualizado_em = CURRENT_TIMESTAMP WHERE id = ? AND usuario_id = ?');
         $stmt->execute([$novoStatus, $id, $usuario_id]);
 
+        self::registrarHistorico((int) $id, $usuario_id, $novoStatus ? 'Prazo concluído' : 'Prazo reaberto', ['concluido' => (int) $prazo['concluido']], ['concluido' => $novoStatus]);
+        Audit::registrar($novoStatus ? 'Prazo concluído' : 'Prazo reaberto', 'prazos', (int) $id, null);
+
         header('Location: /prazos?msg=status');
         exit;
     }
@@ -254,8 +292,19 @@ class PrazosController
         }
 
         $usuario_id = $_SESSION['usuario_id'];
+
+        $stmt = $pdo->prepare('SELECT titulo FROM prazos WHERE id = ? AND usuario_id = ?');
+        $stmt->execute([$id, $usuario_id]);
+        $prazo = $stmt->fetch();
+
+        if (!$prazo) {
+            die('Prazo não encontrado.');
+        }
+
         $stmt = $pdo->prepare('DELETE FROM prazos WHERE id = ? AND usuario_id = ?');
         $stmt->execute([$id, $usuario_id]);
+
+        Audit::registrar('Prazo excluído', 'prazos', (int) $id, 'Título: ' . ($prazo['titulo'] ?? ''));
 
         header('Location: /prazos?msg=excluido');
         exit;
@@ -323,5 +372,23 @@ class PrazosController
 
         $resultado->modify('+' . $diasPrazo . ' days');
         return $resultado;
+    }
+
+    private static function registrarHistorico(int $prazoId, int $usuarioId, string $alteracao, ?array $antes, ?array $depois): void
+    {
+        global $pdo;
+
+        try {
+            $stmt = $pdo->prepare('INSERT INTO prazo_historico (prazo_id, usuario_id, alteracao, antes_json, depois_json) VALUES (:prazo_id, :usuario_id, :alteracao, :antes_json, :depois_json)');
+            $stmt->execute([
+                ':prazo_id' => $prazoId,
+                ':usuario_id' => $usuarioId,
+                ':alteracao' => $alteracao,
+                ':antes_json' => $antes ? json_encode($antes, JSON_UNESCAPED_UNICODE) : null,
+                ':depois_json' => $depois ? json_encode($depois, JSON_UNESCAPED_UNICODE) : null,
+            ]);
+        } catch (PDOException $e) {
+            // Mantém fluxo principal caso tabela de histórico não exista.
+        }
     }
 }

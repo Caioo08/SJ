@@ -1,6 +1,7 @@
 <?php
 
 require_once '../config/database.php';
+require_once '../app/helpers/Audit.php';
 
 class ProcessosController
 {
@@ -122,6 +123,7 @@ class ProcessosController
 
             $processoId = (int) $pdo->lastInsertId();
             self::registrarEvento($processoId, $usuario_id, 'Processo criado', 'Processo cadastrado no sistema.', 'criacao');
+            Audit::registrar('Processo criado', 'processos', $processoId, 'Cliente: ' . $cliente_nome);
 
             header('Location: /processos');
             exit;
@@ -231,6 +233,7 @@ class ProcessosController
             ]);
 
             self::registrarEvento($id, $usuario_id, 'Processo atualizado', 'Dados do processo foram atualizados.', 'atualizacao');
+            Audit::registrar('Processo atualizado', 'processos', (int) $id, 'Cliente: ' . $cliente_nome);
 
             header('Location: /processos');
             exit;
@@ -351,6 +354,7 @@ class ProcessosController
         }
 
         self::registrarEvento($id, $usuario_id, 'Processo excluído', 'Processo removido pelo advogado.', 'sistema');
+        Audit::registrar('Processo excluído', 'processos', (int) $id, null);
 
         // Deletar processo
         $stmt = $pdo->prepare("DELETE FROM processos WHERE id = ? AND usuario_id = ?");
