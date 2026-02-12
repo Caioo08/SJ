@@ -292,6 +292,21 @@ elseif ($uri === '/prazos/novo' && $method === 'GET') {
     PrazosController::create();
 }
 
+
+elseif (preg_match('#^/prazos/edit/(\d+)$#', $uri, $matches) && $method === 'GET') {
+    AuthMiddleware::verificarAdvogado();
+    $id = $matches[1];
+    require_once '../app/controllers/PrazosController.php';
+    PrazosController::edit($id);
+}
+
+elseif (preg_match('#^/prazos/update/(\d+)$#', $uri, $matches) && $method === 'POST') {
+    AuthMiddleware::verificarAdvogado();
+    $id = $matches[1];
+    require_once '../app/controllers/PrazosController.php';
+    PrazosController::update($id);
+}
+
 elseif ($uri === '/prazos/store' && $method === 'POST') {
     AuthMiddleware::verificarAdvogado();
     require_once '../app/controllers/PrazosController.php';

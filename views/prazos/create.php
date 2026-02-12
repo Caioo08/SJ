@@ -4,50 +4,45 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Novo Prazo - Sistema Jurídico</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
 <style>
-body{font-family:Arial,sans-serif;background:#0b0b0b;color:#f6f4ef;margin:0;padding:24px}
-.container{max-width:760px;margin:0 auto;background:#1a1a1a;padding:22px;border-radius:12px;border:1px solid rgba(255,255,255,.08)}
-label{display:block;font-size:13px;color:#bfb39a;margin:12px 0 6px}
-input,select,textarea{width:100%;padding:11px;border-radius:8px;background:#141414;border:1px solid rgba(255,255,255,.1);color:#f6f4ef}
-.actions{display:flex;gap:8px;margin-top:16px}
-.btn{background:#d4af37;color:#0b0b0b;padding:10px 14px;border-radius:8px;border:none;text-decoration:none;font-weight:700}
-.btn-outline{background:#222;color:#f6f4ef}
+:root {--bg:#0b0b0b;--card:#1a1a1a;--bg2:#121212;--txt:#f6f4ef;--acc:#d4af37;--mut:#bfb39a;--bd:rgba(255,255,255,.08);}*{box-sizing:border-box;font-family:'Inter',sans-serif}
+body{margin:0;background:var(--bg);color:var(--txt)}
+.sidebar{position:fixed;left:0;top:0;width:260px;height:100vh;background:var(--card);border-right:1px solid var(--bd);padding:24px 0;overflow-y:auto}.logo-section{padding:0 24px 24px;border-bottom:1px solid var(--bd);margin-bottom:24px}
+.logo-container{display:flex;align-items:center;gap:12px}.logo{width:42px;height:42px;border-radius:8px;background:linear-gradient(135deg,#b8860b,#f1c65b);display:flex;align-items:center;justify-content:center;color:#0b0b0b;font-weight:800}
+.logo-text{font-size:18px;font-weight:700;color:var(--acc)}.nav-menu{list-style:none;padding:0 12px}.nav-link{display:flex;gap:12px;padding:12px 16px;color:var(--mut);text-decoration:none;border-radius:8px}.nav-link:hover,.nav-link.active{background:var(--bg2);color:var(--acc)}
+.main{margin-left:260px;padding:24px}.wrap{max-width:760px;background:var(--card);padding:22px;border-radius:12px;border:1px solid var(--bd)}
+label{display:block;font-size:13px;color:var(--mut);margin:12px 0 6px}input,select,textarea{width:100%;padding:11px;border-radius:8px;background:#141414;border:1px solid var(--bd);color:var(--txt)}
+.actions{display:flex;gap:8px;margin-top:16px}.btn{background:var(--acc);color:#0b0b0b;padding:10px 14px;border-radius:8px;border:none;text-decoration:none;font-weight:700}.btn-outline{background:#222;color:var(--txt)}
+@media (max-width:900px){.sidebar{transform:translateX(-100%)}.main{margin-left:0}}
 </style>
 </head>
 <body>
-<div class="container">
+<aside class="sidebar">
+    <div class="logo-section"><div class="logo-container"><div class="logo">SJ</div><span class="logo-text">Sistema Jurídico</span></div></div>
+    <ul class="nav-menu">
+        <li><a href="/dashboard" class="nav-link"><span>📊</span> Dashboard</a></li>
+        <li><a href="/processos" class="nav-link"><span>⚖️</span> Processos</a></li>
+        <li><a href="/clientes" class="nav-link"><span>👥</span> Clientes</a></li>
+        <li><a href="/compromissos" class="nav-link"><span>📅</span> Compromissos</a></li>
+        <li><a href="/prazos" class="nav-link active"><span>⏳</span> Prazos</a></li>
+        <li><a href="/documentos" class="nav-link"><span>📄</span> Documentos</a></li>
+        <li><a href="/configuracoes" class="nav-link"><span>⚙️</span> Configurações</a></li>
+        <li><a href="/logout" class="nav-link"><span>🚪</span> Sair</a></li>
+    </ul>
+</aside>
+<main class="main"><div class="wrap">
   <h1>➕ Novo Prazo</h1>
   <form action="/prazos/store" method="POST">
     <?= Csrf::field() ?>
-    <label>Título*</label>
-    <input type="text" name="titulo" required>
-
+    <label>Título*</label><input type="text" name="titulo" required>
     <label>Processo (opcional)</label>
-    <select name="processo_id">
-      <option value="">Sem vínculo</option>
-      <?php foreach($processos as $proc): ?>
-      <option value="<?= $proc['id'] ?>"><?= htmlspecialchars($proc['numero_processo'] ?: ('#'.$proc['id'])) ?> - <?= htmlspecialchars($proc['cliente_nome']) ?></option>
-      <?php endforeach; ?>
-    </select>
-
-    <label>Data limite*</label>
-    <input type="datetime-local" name="data_limite" required>
-
-    <label>Prioridade</label>
-    <select name="prioridade">
-      <option value="baixa">Baixa</option>
-      <option value="media" selected>Média</option>
-      <option value="alta">Alta</option>
-    </select>
-
-    <label>Descrição</label>
-    <textarea name="descricao" rows="4"></textarea>
-
-    <div class="actions">
-      <button class="btn" type="submit">Salvar</button>
-      <a class="btn btn-outline" href="/prazos">Cancelar</a>
-    </div>
+    <select name="processo_id"><option value="">Sem vínculo</option><?php foreach($processos as $proc): ?><option value="<?= $proc['id'] ?>"><?= htmlspecialchars($proc['numero_processo'] ?: ('#'.$proc['id'])) ?> - <?= htmlspecialchars($proc['cliente_nome']) ?></option><?php endforeach; ?></select>
+    <label>Data limite*</label><input type="datetime-local" name="data_limite" required>
+    <label>Prioridade</label><select name="prioridade"><option value="baixa">Baixa</option><option value="media" selected>Média</option><option value="alta">Alta</option></select>
+    <label>Descrição</label><textarea name="descricao" rows="4"></textarea>
+    <div class="actions"><button class="btn" type="submit">Salvar</button><a class="btn btn-outline" href="/prazos">Cancelar</a></div>
   </form>
-</div>
+</div></main>
 </body>
 </html>
