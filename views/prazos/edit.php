@@ -9,7 +9,7 @@ body{margin:0;background:var(--bg);color:var(--txt)}.sidebar{position:fixed;left
 .logo-section{padding:0 24px 24px;border-bottom:1px solid var(--bd);margin-bottom:24px}.logo-container{display:flex;align-items:center;gap:12px}.logo{width:42px;height:42px;border-radius:8px;background:linear-gradient(135deg,#b8860b,#f1c65b);display:flex;align-items:center;justify-content:center;color:#0b0b0b;font-weight:800}.logo-text{font-size:18px;font-weight:700;color:var(--acc)}
 .nav-menu{list-style:none;padding:0 12px}.nav-link{display:flex;gap:12px;padding:12px 16px;color:var(--mut);text-decoration:none;border-radius:8px}.nav-link:hover,.nav-link.active{background:var(--bg2);color:var(--acc)}
 .main{margin-left:260px;padding:24px}.wrap{max-width:760px;background:var(--card);padding:22px;border-radius:12px;border:1px solid var(--bd)}label{display:block;font-size:13px;color:var(--mut);margin:12px 0 6px}
-input,select,textarea{width:100%;padding:11px;border-radius:8px;background:#141414;border:1px solid var(--bd);color:var(--txt)}.actions{display:flex;gap:8px;margin-top:16px}.btn{background:var(--acc);color:#0b0b0b;padding:10px 14px;border-radius:8px;border:none;text-decoration:none;font-weight:700}.btn-outline{background:#222;color:var(--txt)}
+input,select,textarea{width:100%;padding:11px;border-radius:8px;background:#141414;border:1px solid var(--bd);color:var(--txt)}.actions{display:flex;gap:8px;margin-top:16px}.btn{background:var(--acc);color:#0b0b0b;padding:10px 14px;border-radius:8px;border:none;text-decoration:none;font-weight:700}.btn-outline{background:#222;color:var(--txt)}.meta{color:var(--mut);font-size:12px}
 @media (max-width:900px){.sidebar{transform:translateX(-100%)}.main{margin-left:0}}
 </style></head><body>
 <aside class="sidebar"><div class="logo-section"><div class="logo-container"><div class="logo">SJ</div><span class="logo-text">Sistema Jurídico</span></div></div>
@@ -20,7 +20,11 @@ input,select,textarea{width:100%;padding:11px;border-radius:8px;background:#1414
 <?= Csrf::field() ?>
 <label>Título*</label><input type="text" name="titulo" required value="<?= htmlspecialchars($prazo['titulo']) ?>">
 <label>Processo (opcional)</label><select name="processo_id"><option value="">Sem vínculo</option><?php foreach($processos as $proc): ?><option value="<?= $proc['id'] ?>" <?= (int)$prazo['processo_id']===(int)$proc['id']?'selected':'' ?>><?= htmlspecialchars($proc['numero_processo'] ?: ('#'.$proc['id'])) ?> - <?= htmlspecialchars($proc['cliente_nome']) ?></option><?php endforeach; ?></select>
-<label>Data limite*</label><input type="datetime-local" name="data_limite" required value="<?= date('Y-m-d\TH:i', strtotime($prazo['data_limite'])) ?>">
+<label>Data limite manual</label><input type="datetime-local" name="data_limite" value="<?= date('Y-m-d\TH:i', strtotime($prazo['data_limite'])) ?>">
+<div class="meta" style="margin-top:6px;">Opcional quando usar cálculo automático abaixo.</div>
+<label>Recalcular prazo (dias)</label><input type="number" min="1" name="dias_prazo" placeholder="Ex: 5">
+<label>Tipo de contagem</label><select name="tipo_contagem"><option value="corridos" selected>Dias corridos</option><option value="uteis">Dias úteis (seg-sex)</option></select>
+<label>Data base do cálculo</label><input type="datetime-local" name="data_base">
 <label>Prioridade</label><select name="prioridade"><option value="baixa" <?= $prazo['prioridade']==='baixa'?'selected':'' ?>>Baixa</option><option value="media" <?= $prazo['prioridade']==='media'?'selected':'' ?>>Média</option><option value="alta" <?= $prazo['prioridade']==='alta'?'selected':'' ?>>Alta</option></select>
 <label>Descrição</label><textarea name="descricao" rows="4"><?= htmlspecialchars($prazo['descricao']) ?></textarea>
 <div class="actions"><button class="btn" type="submit">Atualizar</button><a class="btn btn-outline" href="/prazos">Cancelar</a></div>

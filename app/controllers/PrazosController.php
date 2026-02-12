@@ -96,15 +96,24 @@ class PrazosController
         $titulo = trim($_POST['titulo'] ?? '');
         $descricao = trim($_POST['descricao'] ?? '');
         $data_limite = trim($_POST['data_limite'] ?? '');
+        $dias_prazo = isset($_POST['dias_prazo']) && $_POST['dias_prazo'] !== '' ? (int) $_POST['dias_prazo'] : null;
+        $tipo_contagem = $_POST['tipo_contagem'] ?? 'corridos';
+        $data_base = trim($_POST['data_base'] ?? '');
         $prioridade = $_POST['prioridade'] ?? 'media';
 
-        if ($titulo === '' || $data_limite === '') {
-            die('Título e data limite são obrigatórios.');
+        if ($titulo === '') {
+            die('Título é obrigatório.');
         }
 
         if (!in_array($prioridade, ['baixa', 'media', 'alta'], true)) {
             $prioridade = 'media';
         }
+
+        if (!in_array($tipo_contagem, ['corridos', 'uteis'], true)) {
+            $tipo_contagem = 'corridos';
+        }
+
+        $data_limite = self::resolverDataLimite($data_limite, $dias_prazo, $tipo_contagem, $data_base);
 
         self::validarProcessoDoUsuario($processo_id, $usuario_id, $pdo);
 
@@ -164,15 +173,24 @@ class PrazosController
         $titulo = trim($_POST['titulo'] ?? '');
         $descricao = trim($_POST['descricao'] ?? '');
         $data_limite = trim($_POST['data_limite'] ?? '');
+        $dias_prazo = isset($_POST['dias_prazo']) && $_POST['dias_prazo'] !== '' ? (int) $_POST['dias_prazo'] : null;
+        $tipo_contagem = $_POST['tipo_contagem'] ?? 'corridos';
+        $data_base = trim($_POST['data_base'] ?? '');
         $prioridade = $_POST['prioridade'] ?? 'media';
 
-        if ($titulo === '' || $data_limite === '') {
-            die('Título e data limite são obrigatórios.');
+        if ($titulo === '') {
+            die('Título é obrigatório.');
         }
 
         if (!in_array($prioridade, ['baixa', 'media', 'alta'], true)) {
             $prioridade = 'media';
         }
+
+        if (!in_array($tipo_contagem, ['corridos', 'uteis'], true)) {
+            $tipo_contagem = 'corridos';
+        }
+
+        $data_limite = self::resolverDataLimite($data_limite, $dias_prazo, $tipo_contagem, $data_base);
 
         self::validarProcessoDoUsuario($processo_id, $usuario_id, $pdo);
 
@@ -252,5 +270,58 @@ class PrazosController
                 die('Processo inválido para este usuário.');
             }
         }
+    }
+
+    private static function resolverDataLimite(string $dataLimiteRaw, ?int $diasPrazo, string $tipoContagem, string $dataBaseRaw): string
+    {
+        if ($diasPrazo !== null) {
+            if ($diasPrazo <= 0) {
+                die('Quantidade de dias para cálculo deve ser maior que zero.');
+            }
+
+            $dataBase = $dataBaseRaw !== '' ? self::parseDataHora($dataBaseRaw) : new DateTime();
+            $dataLimite = self::calcularPorDias($dataBase, $diasPrazo, $tipoContagem);
+            return $dataLimite->format('Y-m-d H:i:s');
+        }
+
+        if ($dataLimiteRaw === '') {
+            die('Informe uma data limite manual ou a quantidade de dias para cálculo automático.');
+        }
+
+        return self::parseDataHora($dataLimiteRaw)->format('Y-m-d H:i:s');
+    }
+
+    private static function parseDataHora(string $valor): DateTime
+    {
+        $dt = DateTime::createFromFormat('Y-m-d\TH:i', $valor);
+        if ($dt instanceof DateTime) {
+            return $dt;
+        }
+
+        try {
+            return new DateTime($valor);
+        } catch (Exception $e) {
+            die('Data inválida. Verifique os campos de data e hora.');
+        }
+    }
+
+    private static function calcularPorDias(DateTime $dataBase, int $diasPrazo, string $tipoContagem): DateTime
+    {
+        $resultado = clone $dataBase;
+
+        if ($tipoContagem === 'uteis') {
+            $diasSomados = 0;
+            while ($diasSomados < $diasPrazo) {
+                $resultado->modify('+1 day');
+                $diaSemana = (int) $resultado->format('N');
+                if ($diaSemana <= 5) {
+                    $diasSomados++;
+                }
+            }
+            return $resultado;
+        }
+
+        $resultado->modify('+' . $diasPrazo . ' days');
+        return $resultado;
     }
 }

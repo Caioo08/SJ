@@ -74,7 +74,7 @@ input,select{padding:10px;border-radius:8px;border:1px solid var(--bd);backgroun
   <?php if (empty($prazos)): ?>
     <div class="card">Nenhum prazo encontrado para os filtros selecionados.</div>
   <?php else: ?>
-    <?php foreach($prazos as $p): $restante=(strtotime($p['data_limite'])-time())/86400; $urg=$restante<0&&!$p['concluido']?'🔴 Atrasado':($restante<=2&&!$p['concluido']?'🟠 Crítico':'🟢 Em dia'); ?>
+    <?php foreach($prazos as $p): $restante=(strtotime($p['data_limite'])-time())/86400; $urg=$restante<0&&!$p['concluido']?'🔴 Vencido':($restante<=1&&!$p['concluido']?'🟠 D-1':($restante<=3&&!$p['concluido']?'🟡 D-3':($restante<=7&&!$p['concluido']?'🔵 D-7':'🟢 Em dia'))); ?>
       <div class="card">
         <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;">
           <strong><?= htmlspecialchars($p['titulo']) ?></strong>
