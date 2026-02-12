@@ -371,16 +371,17 @@ elseif ($uri === '/logout') {
 // ==================== ROTA PADRÃO ====================
 
 elseif ($uri === '/') {
-    // Redireciona baseado no perfil se já estiver logado
+    // Se já estiver logado, redireciona por perfil; senão exibe página inicial pública.
     if (isset($_SESSION['usuario_id']) && isset($_SESSION['perfil_id'])) {
         if ($_SESSION['perfil_id'] == 1) {
             header('Location: /admin');
         } else {
             header('Location: /dashboard');
         }
-    } else {
-        header('Location: /login');
+        exit;
     }
+
+    require_once '../views/home.php';
     exit;
 }
 else {
