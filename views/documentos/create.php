@@ -213,6 +213,7 @@ a.btn:hover {
     <div class="card">
         <h1>📤 Enviar Documento</h1>
         <form action="/documentos/store" method="POST" enctype="multipart/form-data" id="uploadForm">
+            <?= Csrf::field() ?>
             
             <!-- Upload do Arquivo -->
             <div class="form-section">
