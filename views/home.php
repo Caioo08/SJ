@@ -3,56 +3,118 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SJ - Sistema Jurídico</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+<title>SJ — Sistema Jurídico</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#0b0b0b;--card:#171717;--txt:#f6f4ef;--acc:#d4af37;--mut:#bfb39a;--bd:rgba(255,255,255,.09)}
-*{box-sizing:border-box;font-family:'Inter',sans-serif} body{margin:0;background:radial-gradient(circle at top,#1b1b1b, #0b0b0b 60%);color:var(--txt)}
-.wrap{max-width:1100px;margin:0 auto;padding:48px 22px}
-.hero{display:grid;grid-template-columns:1.2fr .8fr;gap:24px;align-items:stretch}
-.card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:26px}
-h1{font-size:40px;margin:0 0 10px;color:var(--acc)}p{color:var(--mut);line-height:1.6}
-.badges{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}.badge{padding:8px 12px;border-radius:999px;background:#212121;border:1px solid var(--bd);font-size:13px}
-.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:20px}.btn{background:var(--acc);color:#0b0b0b;padding:12px 16px;border-radius:10px;font-weight:700;text-decoration:none}
-.btn-outline{background:#222;color:var(--txt);border:1px solid var(--bd)}
-.features{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:18px}.feature{background:#121212;border:1px solid var(--bd);border-radius:10px;padding:14px}
-small{color:var(--mut)}
-@media (max-width:900px){.hero{grid-template-columns:1fr}.features{grid-template-columns:1fr}}
+:root {
+  --bg: #0b0b0b;
+  --bg-soft: #121212;
+  --card: #1a1a1a;
+  --text: #f6f4ef;
+  --muted: #bfb39a;
+  --accent: #d4af37;
+  --accent-2: #c49f2c;
+  --border: rgba(255,255,255,0.09);
+  --shadow: 0 16px 50px rgba(0,0,0,.45);
+}
+*{box-sizing:border-box;font-family:'Inter',sans-serif}
+body{margin:0;background:radial-gradient(circle at top,#1b1b1b,#0b0b0b 55%);color:var(--text)}
+.wrap{max-width:1200px;margin:0 auto;padding:28px 20px 44px}
+.topbar{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:22px}
+.brand{display:flex;align-items:center;gap:10px}
+.logo{width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,#b8860b,#f1c65b);display:flex;align-items:center;justify-content:center;color:#0b0b0b;font-weight:800}
+.brand h1{font-size:20px;margin:0;color:var(--accent)}
+.btn{display:inline-flex;align-items:center;justify-content:center;border-radius:10px;padding:12px 16px;font-weight:700;text-decoration:none;border:1px solid transparent;cursor:pointer}
+.btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent-2));color:#0b0b0b}
+.btn-ghost{background:#222;color:var(--text);border-color:var(--border)}
+.hero{display:grid;grid-template-columns:1.2fr .8fr;gap:18px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:24px;box-shadow:var(--shadow)}
+.title{font-size:40px;line-height:1.05;margin:0 0 12px;color:var(--accent)}
+.desc{color:var(--muted);line-height:1.7;margin:0 0 18px}
+.badges{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:18px}
+.badge{border:1px solid var(--border);background:var(--bg-soft);padding:8px 12px;border-radius:999px;font-size:13px;color:var(--muted)}
+.features{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px}
+.feature{background:#131313;border:1px solid var(--border);border-radius:10px;padding:12px}
+.feature strong{color:var(--text);font-size:14px}
+.feature p{margin:5px 0 0;color:var(--muted);font-size:13px;line-height:1.5}
+.aside-title{margin:0 0 8px;color:var(--accent)}
+.aside p{color:var(--muted);line-height:1.6}
+.role-list{display:grid;gap:8px;margin-top:14px}
+.role{background:#141414;border:1px solid var(--border);padding:12px;border-radius:10px}
+.role strong{display:block}
+.role small{color:var(--muted)}
+.role-actions{display:grid;gap:8px;margin-top:14px}
+.footer-note{margin-top:14px;font-size:12px;color:var(--muted)}
+@media (max-width:960px){.hero{grid-template-columns:1fr}.features{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <div class="hero">
-    <section class="card">
-      <h1>⚖️ Sistema Jurídico SJ</h1>
-      <p>Plataforma para organizar rotinas jurídicas com foco em produtividade, segurança e controle de prazos. Centralize processos, clientes, documentos e agenda em um só lugar.</p>
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo">SJ</div>
+      <h1>Sistema Jurídico</h1>
+    </div>
+    <a href="/login" class="btn btn-primary">Entrar</a>
+  </header>
+
+  <section class="hero">
+    <article class="card">
+      <h2 class="title">Organize seu escritório com mais controle e menos retrabalho.</h2>
+      <p class="desc">O SJ centraliza processos, clientes, compromissos, documentos e prazos em um fluxo único. A ideia é dar previsibilidade à rotina jurídica e melhorar a operação do dia a dia.</p>
+
       <div class="badges">
         <span class="badge">🔐 Segurança com CSRF</span>
-        <span class="badge">⏳ Gestão de prazos</span>
-        <span class="badge">📄 Documentos centralizados</span>
+        <span class="badge">⏳ Prazos críticos em destaque</span>
+        <span class="badge">📁 Gestão de documentos</span>
       </div>
-      <div class="actions">
-        <a class="btn" href="/login">Acessar sistema</a>
-        <a class="btn btn-outline" href="/login?acesso=advogado">Entrar como Advogado</a>
-      </div>
-      <div class="features">
-        <div class="feature"><strong>Processos e clientes</strong><br><small>Visão completa da carteira e histórico.</small></div>
-        <div class="feature"><strong>Agenda e compromissos</strong><br><small>Planejamento de audiências e tarefas.</small></div>
-        <div class="feature"><strong>Prazos críticos</strong><br><small>Acompanhamento de urgências em 48h.</small></div>
-      </div>
-    </section>
 
-    <aside class="card">
-      <h2 style="margin-top:0;color:var(--acc)">Tipo de acesso</h2>
-      <p>Escolha seu perfil na próxima etapa de login:</p>
-      <ul style="color:var(--mut);line-height:1.8;padding-left:18px;">
-        <li><strong>Administrador</strong>: gestão de usuários, auditoria e visão global.</li>
-        <li><strong>Advogado</strong>: operação diária de casos, clientes e prazos.</li>
-        <li><strong>Cliente</strong>: área em desenvolvimento (em breve).</li>
-      </ul>
-      <a class="btn" href="/login?acesso=admin">Continuar para Login</a>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <a class="btn btn-primary" href="/login?acesso=advogado">Acessar como Advogado</a>
+        <a class="btn btn-ghost" href="/login?acesso=admin">Acessar como Admin</a>
+      </div>
+
+      <div class="features">
+        <div class="feature">
+          <strong>Processos e Clientes</strong>
+          <p>Visão consolidada da carteira, com histórico e dados essenciais.</p>
+        </div>
+        <div class="feature">
+          <strong>Agenda e Compromissos</strong>
+          <p>Controle das datas importantes para evitar perda de contexto.</p>
+        </div>
+        <div class="feature">
+          <strong>Prazos Processuais</strong>
+          <p>Filtro por urgência, conclusão e prioridade operacional.</p>
+        </div>
+      </div>
+    </article>
+
+    <aside class="card aside">
+      <h3 class="aside-title">Escolha seu tipo de acesso</h3>
+      <p>Na próxima tela você seleciona o perfil e entra com email/senha.</p>
+
+      <div class="role-list">
+        <div class="role">
+          <strong>Administrador</strong>
+          <small>Gestão de usuários, auditoria e visão global do sistema.</small>
+        </div>
+        <div class="role">
+          <strong>Advogado</strong>
+          <small>Operação diária com processos, clientes e prazos.</small>
+        </div>
+        <div class="role">
+          <strong>Cliente (em breve)</strong>
+          <small>Área planejada para acompanhamento e interação.</small>
+        </div>
+      </div>
+
+      <div class="role-actions">
+        <a class="btn btn-primary" href="/login">Continuar para o login</a>
+      </div>
+      <div class="footer-note">Sistema Jurídico © <?= date('Y') ?></div>
     </aside>
-  </div>
+  </section>
 </div>
 </body>
 </html>
