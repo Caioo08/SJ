@@ -1,4 +1,3 @@
-<?php session_start(); ?>
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -21,7 +20,9 @@
     --shadow: 0 4px 20px rgba(0,0,0,0.4);
     --success: #4ade80;
     --info: #60a5fa;
+    --danger: #f87171;
 }
+
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -554,6 +555,11 @@ body {
                 </a>
             </li>
             <li class="nav-item">
+                <a href="/prazos" class="nav-link">
+                    <span>⏳</span> Prazos
+                </a>
+            </li>
+            <li class="nav-item">
                 <a href="/documentos" class="nav-link">
                     <span>📄</span> Documentos
                 </a>
@@ -622,6 +628,16 @@ body {
                 <div class="stat-icon">📅</div>
             </div>
         </div>
+
+        <div class="stat-card">
+            <div class="stat-header">
+                <div>
+                    <div class="stat-value"><?= $total_prazos_abertos ?></div>
+                    <div class="stat-label">Prazos Abertos</div>
+                </div>
+                <div class="stat-icon">🚨</div>
+            </div>
+        </div>
     </div>
 
     <!-- Personal Info -->
@@ -647,6 +663,31 @@ body {
                 <span class="info-value"><?= htmlspecialchars($usuario['uf']) ?></span>
             </div>
         </div>
+    </section>
+
+    <section class="info-section">
+        <div class="section-header">
+            <h2 class="section-title">Alertas de Prazo (D-7, D-3, D-1 e vencidos)</h2>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
+            <span style="padding:4px 10px;border-radius:999px;background:rgba(74,158,255,.2);color:#4a9eff;font-size:12px;font-weight:700;">D-7: <?= (int)($alertas_prazos['d7'] ?? 0) ?></span>
+            <span style="padding:4px 10px;border-radius:999px;background:rgba(212,175,55,.2);color:#d4af37;font-size:12px;font-weight:700;">D-3: <?= (int)($alertas_prazos['d3'] ?? 0) ?></span>
+            <span style="padding:4px 10px;border-radius:999px;background:rgba(249,115,22,.2);color:#fb923c;font-size:12px;font-weight:700;">D-1: <?= (int)($alertas_prazos['d1'] ?? 0) ?></span>
+            <span style="padding:4px 10px;border-radius:999px;background:rgba(239,68,68,.2);color:#ef4444;font-size:12px;font-weight:700;">Vencidos: <?= (int)($alertas_prazos['vencidos'] ?? 0) ?></span>
+        </div>
+        <?php if(empty($prazos_criticos)): ?>
+            <div class="empty-state" style="padding:20px;">✅ Nenhum prazo crítico nos próximos 7 dias.</div>
+        <?php else: ?>
+            <div class="appointments-list">
+                <?php foreach($prazos_criticos as $p): ?>
+                    <div class="appointment-card" style="border-left-color: var(--danger);">
+                        <div class="appointment-time">⏰ <?= date('d/m/Y H:i', strtotime($p['data_limite'])) ?></div>
+                        <div class="appointment-title"><?= htmlspecialchars($p['titulo']) ?></div>
+                        <div class="appointment-location">Prioridade: <?= strtoupper(htmlspecialchars($p['prioridade'])) ?> · Alerta: <?= htmlspecialchars($p['faixa_alerta']) ?></div>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+        <?php endif; ?>
     </section>
 
     <!-- Dashboard Grid -->
