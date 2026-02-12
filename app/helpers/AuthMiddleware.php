@@ -7,7 +7,7 @@ class AuthMiddleware
      */
     public static function verificarLogin()
     {
-        if (!isset($_SESSION['usuario_id'])) {
+        if (!isset($_SESSION['usuario_id']) && !isset($_SESSION['cliente_id'])) {
             header('Location: /login');
             exit;
         }
@@ -156,6 +156,21 @@ class AuthMiddleware
         }
     }
 
+
+
+    /**
+     * Verifica se o usuário é cliente
+     */
+    public static function verificarCliente()
+    {
+        self::verificarLogin();
+
+        if (!isset($_SESSION['perfil_id']) || $_SESSION['perfil_id'] != 3 || !isset($_SESSION['cliente_id'])) {
+            header('Location: /login?acesso=cliente');
+            exit;
+        }
+    }
+
     /**
      * Redireciona baseado no perfil do usuário
      */
@@ -167,8 +182,11 @@ class AuthMiddleware
             if ($_SESSION['perfil_id'] == 1) {
                 header('Location: /admin');
                 exit;
-            } else {
+            } elseif ($_SESSION['perfil_id'] == 2) {
                 header('Location: /dashboard');
+                exit;
+            } else {
+                header('Location: /cliente');
                 exit;
             }
         }
