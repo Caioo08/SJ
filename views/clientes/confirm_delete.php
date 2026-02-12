@@ -202,6 +202,7 @@ button, a.btn {
         <?php endif; ?>
 
         <form action="/clientes/delete/<?= $cliente['id'] ?>" method="POST">
+            <?= Csrf::field() ?>
             <div class="form-group">
                 <label for="senha">Digite sua senha para confirmar a exclusão:</label>
                 <input type="password" id="senha" name="senha" placeholder="••••••••" required autofocus>
