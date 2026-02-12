@@ -555,6 +555,11 @@ body {
                 </a>
             </li>
             <li class="nav-item">
+                <a href="/prazos" class="nav-link">
+                    <span>⏳</span> Prazos
+                </a>
+            </li>
+            <li class="nav-item">
                 <a href="/documentos" class="nav-link">
                     <span>📄</span> Documentos
                 </a>
@@ -627,8 +632,8 @@ body {
         <div class="stat-card">
             <div class="stat-header">
                 <div>
-                    <div class="stat-value"><?= count($prazos_criticos) ?></div>
-                    <div class="stat-label">Prazos Críticos (48h)</div>
+                    <div class="stat-value"><?= $total_prazos_abertos ?></div>
+                    <div class="stat-label">Prazos Abertos</div>
                 </div>
                 <div class="stat-icon">🚨</div>
             </div>
@@ -670,11 +675,9 @@ body {
             <div class="appointments-list">
                 <?php foreach($prazos_criticos as $p): ?>
                     <div class="appointment-card" style="border-left-color: var(--danger);">
-                        <div class="appointment-time">⏰ <?= date('d/m/Y H:i', strtotime($p['data_inicio'])) ?></div>
+                        <div class="appointment-time">⏰ <?= date('d/m/Y H:i', strtotime($p['data_limite'])) ?></div>
                         <div class="appointment-title"><?= htmlspecialchars($p['titulo']) ?></div>
-                        <?php if($p['local']): ?>
-                            <div class="appointment-location">📍 <?= htmlspecialchars($p['local']) ?></div>
-                        <?php endif; ?>
+                        <div class="appointment-location">Prioridade: <?= strtoupper(htmlspecialchars($p['prioridade'])) ?></div>
                     </div>
                 <?php endforeach; ?>
             </div>

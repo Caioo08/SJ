@@ -277,6 +277,41 @@ elseif (preg_match('#^/documentos/delete/(\d+)$#', $uri, $matches) && $method ==
     DocumentosController::delete($id);
 }
 
+
+// ==================== PRAZOS (APENAS ADVOGADOS) ====================
+
+elseif ($uri === '/prazos') {
+    AuthMiddleware::verificarAdvogado();
+    require_once '../app/controllers/PrazosController.php';
+    PrazosController::index();
+}
+
+elseif ($uri === '/prazos/novo' && $method === 'GET') {
+    AuthMiddleware::verificarAdvogado();
+    require_once '../app/controllers/PrazosController.php';
+    PrazosController::create();
+}
+
+elseif ($uri === '/prazos/store' && $method === 'POST') {
+    AuthMiddleware::verificarAdvogado();
+    require_once '../app/controllers/PrazosController.php';
+    PrazosController::store();
+}
+
+elseif (preg_match('#^/prazos/toggle/(\d+)$#', $uri, $matches) && $method === 'POST') {
+    AuthMiddleware::verificarAdvogado();
+    $id = $matches[1];
+    require_once '../app/controllers/PrazosController.php';
+    PrazosController::toggleConclusao($id);
+}
+
+elseif (preg_match('#^/prazos/delete/(\d+)$#', $uri, $matches) && $method === 'POST') {
+    AuthMiddleware::verificarAdvogado();
+    $id = $matches[1];
+    require_once '../app/controllers/PrazosController.php';
+    PrazosController::delete($id);
+}
+
 // ==================== CONFIGURAÇÕES (APENAS ADVOGADOS) ====================
 
 elseif ($uri === '/configuracoes') {

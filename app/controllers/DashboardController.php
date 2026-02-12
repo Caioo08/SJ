@@ -30,17 +30,30 @@ class DashboardController
         $processos_abertos = $stmt->fetch()['abertos'];
 
 
-        // Prazos críticos (próximas 48h)
-        $stmt = $pdo->prepare("
-            SELECT id, titulo, data_inicio, local
-            FROM compromissos
-            WHERE usuario_id = ?
-              AND data_inicio BETWEEN NOW() AND DATE_ADD(NOW(), INTERVAL 48 HOUR)
-            ORDER BY data_inicio ASC
-            LIMIT 5
-        ");
-        $stmt->execute([$usuario_id]);
-        $prazos_criticos = $stmt->fetchAll();
+        // Prazos críticos (próximas 48h) - módulo de prazos processuais
+        $prazos_criticos = [];
+        $total_prazos_abertos = 0;
+        try {
+            $stmt = $pdo->prepare("
+                SELECT id, titulo, data_limite, prioridade
+                FROM prazos
+                WHERE usuario_id = ?
+                  AND concluido = 0
+                  AND data_limite BETWEEN NOW() AND DATE_ADD(NOW(), INTERVAL 48 HOUR)
+                ORDER BY data_limite ASC
+                LIMIT 5
+            ");
+            $stmt->execute([$usuario_id]);
+            $prazos_criticos = $stmt->fetchAll();
+
+            $stmt = $pdo->prepare("SELECT COUNT(*) AS total FROM prazos WHERE usuario_id = ? AND concluido = 0");
+            $stmt->execute([$usuario_id]);
+            $total_prazos_abertos = (int) ($stmt->fetch()['total'] ?? 0);
+        } catch (PDOException $e) {
+            // Mantém dashboard funcional caso tabela ainda não tenha sido aplicada no banco.
+            $prazos_criticos = [];
+            $total_prazos_abertos = 0;
+        }
 
         // Próximos compromissos (7 dias)
         $stmt = $pdo->prepare("
