@@ -8,6 +8,12 @@ class AuthController
     
     public static function loginForm()
     {
+        $acessoSelecionado = $_GET['acesso'] ?? 'advogado';
+        $acessosPermitidos = ['admin', 'advogado', 'cliente'];
+        if (!in_array($acessoSelecionado, $acessosPermitidos, true)) {
+            $acessoSelecionado = 'advogado';
+        }
+
         require_once '../views/auth/login.php';
     }
 
@@ -65,6 +71,24 @@ class AuthController
         $email = $_POST['email'] ?? '';
         $senha = $_POST['senha'] ?? '';
 
+
+        $perfilAcesso = $_POST['perfil_acesso'] ?? '';
+        $mapaPerfis = [
+            'admin' => 1,
+            'advogado' => 2,
+            'cliente' => 3,
+        ];
+
+        if (!array_key_exists($perfilAcesso, $mapaPerfis)) {
+            self::showError('Perfil de acesso inválido', 'Selecione o tipo de acesso para continuar.', '/login');
+            exit;
+        }
+
+        if ($perfilAcesso === 'cliente') {
+            self::showError('Acesso de cliente em breve', 'A área do cliente ainda está em desenvolvimento. Use acesso Admin ou Advogado por enquanto.', '/login?acesso=cliente', 'warning');
+            exit;
+        }
+
         if (empty($email) || empty($senha)) {
             self::showError('Erro de validação', 'Preencha todos os campos para continuar.', '/login');
             exit;
@@ -79,6 +103,17 @@ class AuthController
                 'Credenciais inválidas', 
                 'Email ou senha incorretos. Verifique seus dados e tente novamente.',
                 '/login'
+            );
+            exit;
+        }
+
+
+        if ((int)$usuario['perfil_id'] !== (int)$mapaPerfis[$perfilAcesso]) {
+            self::showError(
+                'Perfil incorreto',
+                'O perfil selecionado não corresponde a este usuário. Verifique se você escolheu Admin ou Advogado corretamente.',
+                '/login?acesso=' . urlencode($perfilAcesso),
+                'warning'
             );
             exit;
         }
