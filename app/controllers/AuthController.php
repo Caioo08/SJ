@@ -1,0 +1,314 @@
+<?php
+
+require_once '../config/database.php';
+
+
+class AuthController
+{
+    
+    public static function loginForm()
+    {
+        require_once '../views/auth/login.php';
+    }
+
+    public static function registerForm()
+    {
+        global $pdo;
+
+        // Buscar UFs do banco
+        $stmt = $pdo->query("SELECT id, sigla FROM ufs ORDER BY sigla");
+        $ufs = $stmt->fetchAll();
+
+        // Carregar a view
+        require __DIR__ . '/../../views/auth/register.php';
+    }
+
+    public static function register()
+    {
+        global $pdo;
+
+        $nome   = $_POST['nome'];
+        $email  = $_POST['email'];
+        $senha  = $_POST['senha'];
+        $oab    = $_POST['oab'];
+        $ufOab  = strtoupper($_POST['uf_id']);
+
+        // Hash da senha
+        $senhaHash = password_hash($senha, PASSWORD_DEFAULT);
+
+        try {
+            $stmt = $pdo->prepare("
+                INSERT INTO usuarios (nome, email, senha_hash, oab, uf_id)
+                VALUES (:nome, :email, :senha, :oab, :uf)
+            ");
+
+            $stmt->execute([
+                ':nome'  => $nome,
+                ':email' => $email,
+                ':senha' => $senhaHash,
+                ':oab'   => $oab,
+                ':uf'    => $ufOab
+            ]);
+
+            header('Location: /login');
+            exit;
+
+        } catch (PDOException $e) {
+            echo "Erro ao cadastrar: " . $e->getMessage();
+        }
+    }
+
+    public static function login()
+    {
+        global $pdo;
+
+        $email = $_POST['email'] ?? '';
+        $senha = $_POST['senha'] ?? '';
+
+        if (empty($email) || empty($senha)) {
+            self::showError('Erro de validação', 'Preencha todos os campos para continuar.', '/login');
+            exit;
+        }
+
+        $stmt = $pdo->prepare("SELECT * FROM usuarios WHERE email = ?");
+        $stmt->execute([$email]);
+        $usuario = $stmt->fetch();
+
+        if (!$usuario || !password_verify($senha, $usuario['senha_hash'])) {
+            self::showError(
+                'Credenciais inválidas', 
+                'Email ou senha incorretos. Verifique seus dados e tente novamente.',
+                '/login'
+            );
+            exit;
+        }
+
+        // Verificar se o usuário está ativo
+        if (!$usuario['ativo']) {
+            self::showError(
+                'Conta desativada',
+                'Sua conta foi desativada pelo administrador. Entre em contato com o suporte para mais informações.',
+                '/login',
+                'warning'
+            );
+            exit;
+        }
+
+        // ✅ CORREÇÃO: Armazenar perfil_id na sessão
+        $_SESSION['usuario_id'] = $usuario['id'];
+        $_SESSION['usuario_nome'] = $usuario['nome'];
+        $_SESSION['perfil_id'] = $usuario['perfil_id']; // ← ADICIONADO
+
+        // Redirecionar baseado no perfil
+        if ($usuario['perfil_id'] == 1) {
+            // Admin
+            header('Location: /admin');
+        } else {
+            // Advogado
+            header('Location: /dashboard');
+        }
+        exit;
+    }
+
+    /**
+     * Exibe página de erro estilizada
+     */
+    private static function showError($titulo, $mensagem, $voltarPara = '/login', $tipo = 'error')
+    {
+        $icone = $tipo === 'warning' ? '⚠️' : '🔒';
+        $cor = $tipo === 'warning' ? '#f59e0b' : '#ef4444';
+        
+        echo "<!DOCTYPE html>
+<html lang='pt-br'>
+<head>
+    <meta charset='UTF-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+    <title>{$titulo} - Sistema Jurídico</title>
+    <link href='https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap' rel='stylesheet'>
+    <style>
+        :root {
+            --bg: #0a0a0a;
+            --card: #1a1a1a;
+            --primary: #f6f4ef;
+            --accent: #d4af37;
+            --muted: #bfb39a;
+            --border: rgba(255,255,255,0.08);
+            --shadow: 0 10px 40px rgba(0,0,0,0.6);
+            --error: {$cor};
+        }
+
+        * { 
+            box-sizing: border-box; 
+            margin: 0; 
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--primary);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .error-container {
+            max-width: 500px;
+            width: 100%;
+            animation: slideUp 0.3s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .error-card {
+            background: var(--card);
+            border-radius: 16px;
+            padding: 40px 32px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            text-align: center;
+        }
+
+        .error-icon {
+            font-size: 64px;
+            margin-bottom: 24px;
+            display: block;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .error-title {
+            color: var(--error);
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            letter-spacing: -0.5px;
+        }
+
+        .error-message {
+            color: var(--muted);
+            font-size: 15px;
+            line-height: 1.6;
+            margin-bottom: 32px;
+        }
+
+        .error-actions {
+            display: flex;
+            gap: 12px;
+            flex-direction: column;
+        }
+
+        .btn {
+            padding: 14px 24px;
+            border-radius: 10px;
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 15px;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent), #c49f2c);
+            color: #0b0b0b;
+        }
+
+        .btn-primary:hover {
+            filter: brightness(1.1);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(212, 175, 55, 0.3);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--muted);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--primary);
+        }
+
+        .footer-text {
+            margin-top: 24px;
+            padding-top: 24px;
+            border-top: 1px solid var(--border);
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        @media (max-width: 480px) {
+            .error-card {
+                padding: 32px 24px;
+            }
+            
+            .error-icon {
+                font-size: 48px;
+            }
+            
+            .error-title {
+                font-size: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class='error-container'>
+        <div class='error-card'>
+            <span class='error-icon'>{$icone}</span>
+            <h1 class='error-title'>{$titulo}</h1>
+            <p class='error-message'>{$mensagem}</p>
+            
+            <div class='error-actions'>
+                <a href='{$voltarPara}' class='btn btn-primary'>
+                    ← Tentar novamente
+                </a>
+                <button onclick='history.back()' class='btn btn-secondary'>
+                    Voltar
+                </button>
+            </div>
+
+            <div class='footer-text'>
+                Sistema Jurídico © " . date('Y') . "
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Auto-focus no botão principal após 100ms
+        setTimeout(() => {
+            document.querySelector('.btn-primary').focus();
+        }, 100);
+
+        // Permitir pressionar Enter para voltar
+        document.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                window.location.href = '{$voltarPara}';
+            }
+        });
+    </script>
+</body>
+</html>";
+    }
+}
