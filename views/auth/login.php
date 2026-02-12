@@ -1,109 +1,90 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Login - Sistema Jurídico</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
-  <style>
-    /* Paleta: preto profundo com toques dourados */
-    :root {
-      /* tons claros caso user force light */
-      --bg: #0a0a0a; /* fallback escuro */
-      --card: #0b0b0b;
-      --primary: #f6f4ef; /* texto principal claro */
-      --accent: #d4af37; /* dourado clássico */
-      --muted: #bfb39a; /* dourado pálido para textos secundários */
-      --card-border: rgba(255,255,255,0.03);
-      --shadow: 0 10px 30px rgba(0,0,0,0.6);
-      --logo-grad: linear-gradient(135deg,#b8860b,#f1c65b);
-      --btn-text: #0b0b0b;
-    }
-
-    /* Se o sistema preferir dark, mantém a paleta preta/dourada (consistente) */
-    @media (prefers-color-scheme: dark) {
-      :root {
-        --bg: #000000;
-        --card: #071014;
-        --primary: #f6f4ef;
-        --accent: #d4af37;
-        --muted: #bfb39a;
-        --card-border: rgba(255,255,255,0.04);
-        --shadow: 0 12px 40px rgba(0,0,0,0.7);
-        --logo-grad: linear-gradient(135deg,#b8860b,#f1c65b);
-      }
-    }
-
-    /* Classe para forçar tema escuro (preto/dourado) */
-    .dark {
-      --bg: #000000;
-      --card: #071014;
-      --primary: #f6f4ef;
-      --accent: #d4af37;
-      --muted: #bfb39a;
-      --card-border: rgba(255,255,255,0.04);
-      --shadow: 0 12px 40px rgba(0,0,0,0.7);
-      --logo-grad: linear-gradient(135deg,#b8860b,#f1c65b);
-      --btn-text: #0b0b0b;
-    }
-
-    *{box-sizing:border-box;font-family:'Inter',system-ui,'Segoe UI',Roboto,Helvetica,Arial,sans-serif}
-    html,body{height:100%}
-    body{
-      margin:0;
-      background:linear-gradient(180deg, var(--bg) 0%, rgba(0,0,0,0) 100%);
-      display:flex;align-items:center;justify-content:center;min-height:100vh;color:var(--primary);
-      transition:background-color .18s ease,color .18s ease;
-    }
-    .container{width:100%;max-width:420px;padding:32px}
-    .card{background:var(--card);border-radius:12px;padding:28px;box-shadow:var(--shadow);border:1px solid var(--card-border);transition:background-color .18s ease,box-shadow .18s ease}
-    .brand{display:flex;align-items:center;gap:12px;margin-bottom:18px}
-    .logo{width:44px;height:44px;border-radius:8px;background:var(--logo-grad);display:flex;align-items:center;justify-content:center;color:#0b0b0b;font-weight:800}
-    h1{margin:0;font-size:20px;color:var(--primary)}
-    p.lead{margin:6px 0 18px;color:var(--muted);font-size:13px}
-    form{display:grid;gap:12px}
-    label{font-size:13px;color:var(--muted);display:block;margin-bottom:6px}
-
-    /* Inputs discretos sobre fundo preto */
-    input[type="email"],input[type="password"]{width:100%;padding:12px 14px;border-radius:8px;border:1px solid rgba(255,255,255,0.03);background:transparent;color:var(--primary);font-size:14px;outline:none;transition:box-shadow .15s,border-color .15s,background-color .15s}
-    input::placeholder{color:rgba(255,255,255,0.35)}
-    input:focus{border-color:var(--accent);box-shadow:0 6px 20px rgba(212,175,55,0.12)}
-
-    .actions{display:flex;align-items:center;justify-content:space-between;margin-top:6px}
-
-    /* Botão dourado com texto escuro para contraste forte */
-    .btn{background:var(--accent);color:var(--btn-text);padding:11px 16px;border-radius:8px;border:none;font-weight:700;cursor:pointer;box-shadow:0 6px 18px rgba(212,175,55,0.12)}
-    .btn:hover{filter:brightness(.98)}
-
-    a.register{color:var(--muted);text-decoration:none;font-size:14px;border-bottom:1px dashed rgba(255,255,255,0.04);padding-bottom:2px}
-    a.register:hover{color:var(--accent)}
-
-    .footer{margin-top:14px;text-align:center;color:var(--muted);font-size:13px}
-
-    /* Botão alternador de tema: destacando com dourado quando ativo */
-    .theme-toggle{margin-left:auto;background:transparent;border:1px solid rgba(255,255,255,0.04);padding:8px;border-radius:8px;cursor:pointer;font-size:16px;display:inline-flex;align-items:center;justify-content:center;min-width:44px;color:var(--muted)}
-    .theme-toggle[aria-pressed="true"]{background:linear-gradient(90deg,rgba(212,175,55,0.12),rgba(212,175,55,0.06));color:var(--accent);border-color:rgba(212,175,55,0.12)}
-    .theme-toggle:focus{outline:3px solid rgba(212,175,55,0.12);outline-offset:2px}
-
-    @media (max-width:480px){.container{padding:20px}.card{padding:20px}}
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Login — Sistema Jurídico</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#0a0a0a; --card:#121212; --card-2:#1a1a1a; --txt:#f6f4ef; --mut:#bfb39a;
+  --acc:#d4af37; --acc-2:#c49f2c; --bd:rgba(255,255,255,.08); --shadow:0 16px 40px rgba(0,0,0,.5);
+}
+*{box-sizing:border-box;font-family:'Inter',sans-serif}
+html,body{height:100%}
+body{margin:0;background:radial-gradient(circle at top,#191919,#0a0a0a 58%);display:flex;align-items:center;justify-content:center;color:var(--txt)}
+.container{width:100%;max-width:980px;padding:24px}
+.layout{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:22px;box-shadow:var(--shadow)}
+.logo-row{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.logo{width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,#b8860b,#f1c65b);display:flex;align-items:center;justify-content:center;color:#0b0b0b;font-weight:800}
+h1{margin:0;font-size:24px;color:var(--acc)}
+p{margin:6px 0 0;color:var(--mut);line-height:1.6}
+.top-links{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.top-links a{color:var(--mut);text-decoration:none;font-size:14px}
+.role-grid{display:grid;gap:8px;margin-top:12px}
+.role-card{border:1px solid var(--bd);background:var(--card-2);border-radius:10px;padding:12px;cursor:pointer;transition:.15s}
+.role-card:hover{border-color:rgba(212,175,55,.5)}
+.role-card.active{border-color:var(--acc);box-shadow:0 0 0 2px rgba(212,175,55,.18) inset}
+.role-title{font-weight:700}
+.role-desc{font-size:13px;color:var(--mut);margin-top:4px}
+form{display:grid;gap:12px;margin-top:8px}
+label{font-size:13px;color:var(--mut);display:block;margin-bottom:6px}
+input,select{width:100%;padding:12px;border-radius:8px;border:1px solid var(--bd);background:#0f0f0f;color:var(--txt)}
+input:focus,select:focus{outline:none;border-color:var(--acc);box-shadow:0 0 0 3px rgba(212,175,55,.12)}
+.help{font-size:12px;color:var(--mut)}
+.btn{background:linear-gradient(135deg,var(--acc),var(--acc-2));color:#0b0b0b;padding:12px 14px;border:none;border-radius:9px;font-weight:800;cursor:pointer}
+.footer{margin-top:12px;color:var(--mut);font-size:12px}
+@media (max-width:900px){.layout{grid-template-columns:1fr}}
+</style>
 </head>
-
 <body>
-  <div class="container">
-    <div class="card" role="main" aria-label="Formulário de login">
-      <div class="brand">
+<div class="container">
+  <div class="layout">
+    <section class="card">
+      <div class="logo-row">
         <div class="logo">SJ</div>
         <div>
-          <h1>Login do Advogado</h1>
-          <p class="lead">Acesse sua conta para gerenciar processos e clientes</p>
-        </div>
-        <div style="margin-left:auto">
-          <button id="themeToggle" class="theme-toggle" aria-pressed="false" aria-label="Alternar tema" title="Alternar tema">🌙</button>
+          <h1>Acesso ao sistema</h1>
+          <p>Selecione seu perfil e entre com suas credenciais.</p>
         </div>
       </div>
 
+      <div class="role-grid" id="roleGrid">
+        <div class="role-card" data-role="admin">
+          <div class="role-title">Administrador</div>
+          <div class="role-desc">Gerencia usuários, auditoria e configurações globais.</div>
+        </div>
+        <div class="role-card" data-role="advogado">
+          <div class="role-title">Advogado</div>
+          <div class="role-desc">Opera processos, clientes, compromissos e prazos.</div>
+        </div>
+        <div class="role-card" data-role="cliente">
+          <div class="role-title">Cliente (em breve)</div>
+          <div class="role-desc">Portal de acompanhamento de demandas.</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="top-links">
+        <a href="/">← Voltar para início</a>
+        <a href="/register">Cadastrar advogado</a>
+      </div>
+
       <form method="POST" action="/login" novalidate>
+        <?= Csrf::field() ?>
+
+        <div>
+          <label for="perfil_acesso">Perfil de acesso</label>
+          <select id="perfil_acesso" name="perfil_acesso" required>
+            <option value="admin" <?= ($acessoSelecionado ?? '') === 'admin' ? 'selected' : '' ?>>Administrador</option>
+            <option value="advogado" <?= ($acessoSelecionado ?? '') === 'advogado' ? 'selected' : '' ?>>Advogado</option>
+            <option value="cliente" <?= ($acessoSelecionado ?? '') === 'cliente' ? 'selected' : '' ?>>Cliente (em breve)</option>
+          </select>
+          <div class="help">* Cliente estará disponível em uma próxima entrega.</div>
+        </div>
+
         <div>
           <label for="email">Email</label>
           <input id="email" type="email" name="email" required placeholder="seu@exemplo.com">
@@ -114,18 +95,33 @@
           <input id="senha" type="password" name="senha" required placeholder="••••••••">
         </div>
 
-        <div class="actions">
-          <a href="/register" class="register">Cadastrar advogado</a>
-          <button type="submit" class="btn">Entrar</button>
-        </div>
+        <button type="submit" class="btn">Entrar</button>
       </form>
 
-      <div class="footer">
-        <small>Não compartilhe suas credenciais. Sistema Jurídico © <?= date('Y') ?></small>
-      </div>
-    </div>
+      <div class="footer">Sistema Jurídico © <?= date('Y') ?></div>
+    </section>
   </div>
+</div>
 
-  
+<script>
+(function(){
+  const select = document.getElementById('perfil_acesso');
+  const cards = Array.from(document.querySelectorAll('.role-card'));
+
+  function paint() {
+    cards.forEach(c => c.classList.toggle('active', c.dataset.role === select.value));
+  }
+
+  cards.forEach(card => {
+    card.addEventListener('click', () => {
+      select.value = card.dataset.role;
+      paint();
+    });
+  });
+
+  select.addEventListener('change', paint);
+  paint();
+})();
+</script>
 </body>
 </html>

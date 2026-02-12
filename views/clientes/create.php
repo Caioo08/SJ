@@ -195,6 +195,7 @@ a.btn:hover {
     <div class="card">
         <h1>📋 Novo Cliente</h1>
         <form action="/clientes/store" method="POST">
+            <?= Csrf::field() ?>
             
             <!-- Dados Pessoais -->
             <div class="form-section">
