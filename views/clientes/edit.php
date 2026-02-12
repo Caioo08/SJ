@@ -157,6 +157,7 @@ a.btn:hover {
 <h1>✏️ Editar Cliente</h1>
 
 <form action="/clientes/update/<?= $cliente['id'] ?>" method="POST">
+            <?= Csrf::field() ?>
 
 <!-- Dados Pessoais -->
 <div class="form-section">
