@@ -359,4 +359,26 @@ class ProcessosController
         header('Location: /processos?deleted=1');
         exit;
     }
+    private static function registrarEvento(int $processoId, int $usuarioId, string $titulo, string $descricao = '', string $tipo = 'sistema'): void
+    {
+        global $pdo;
+
+        try {
+            $stmt = $pdo->prepare("
+                INSERT INTO processo_eventos (processo_id, usuario_id, titulo, descricao, tipo)
+                VALUES (:processo_id, :usuario_id, :titulo, :descricao, :tipo)
+            ");
+
+            $stmt->execute([
+                ':processo_id' => $processoId,
+                ':usuario_id' => $usuarioId,
+                ':titulo' => $titulo,
+                ':descricao' => $descricao,
+                ':tipo' => $tipo
+            ]);
+        } catch (PDOException $e) {
+            // Não interrompe o fluxo principal caso a tabela de eventos ainda não exista.
+        }
+    }
+
 }
