@@ -49,7 +49,7 @@ elseif (preg_match('#^/admin/usuarios/(\d+)$#', $uri, $matches) && $method === '
     AdminController::verUsuario($id);
 }
 
-elseif (preg_match('#^/admin/usuarios/toggle/(\d+)$#', $uri, $matches)) {
+elseif (preg_match('#^/admin/usuarios/toggle/(\d+)$#', $uri, $matches) && $method === 'POST') {
     AuthMiddleware::verificarAdmin();
     $id = $matches[1];
     require_once '../app/controllers/AdminController.php';
@@ -236,7 +236,7 @@ elseif (preg_match('#^/compromissos/update/(\d+)$#', $uri, $matches) && $method 
     CompromissosController::update($id);
 }
 
-elseif (preg_match('#^/compromissos/delete/(\d+)$#', $uri, $matches)) {
+elseif (preg_match('#^/compromissos/delete/(\d+)$#', $uri, $matches) && $method === 'POST') {
     AuthMiddleware::verificarAdvogado();
     $id = $matches[1];
     require_once '../app/controllers/CompromissosController.php';
@@ -263,14 +263,14 @@ elseif ($uri === '/documentos/store' && $method === 'POST') {
     DocumentosController::store();
 }
 
-elseif (preg_match('#^/documentos/download/(\d+)$#', $uri, $matches)) {
+elseif (preg_match('#^/documentos/download/(\d+)$#', $uri, $matches) && $method === 'GET') {
     AuthMiddleware::verificarAdvogado();
     $id = $matches[1];
     require_once '../app/controllers/DocumentosController.php';
     DocumentosController::download($id);
 }
 
-elseif (preg_match('#^/documentos/delete/(\d+)$#', $uri, $matches)) {
+elseif (preg_match('#^/documentos/delete/(\d+)$#', $uri, $matches) && $method === 'POST') {
     AuthMiddleware::verificarAdvogado();
     $id = $matches[1];
     require_once '../app/controllers/DocumentosController.php';

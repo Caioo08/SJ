@@ -399,9 +399,10 @@ h1 {
 
                     <div class="compromisso-actions">
                         <a href="/compromissos/edit/<?= $c['id'] ?>" class="btn btn-small btn-edit">✏️ Editar</a>
-                        <a href="/compromissos/delete/<?= $c['id'] ?>" 
-                           class="btn btn-small btn-delete" 
-                           onclick="return confirm('Tem certeza que deseja excluir este compromisso?')">🗑️ Excluir</a>
+                        <form action="/compromissos/delete/<?= $c['id'] ?>" method="POST" style="display:inline;">
+                            <?= Csrf::field() ?>
+                            <button type="submit" class="btn btn-small btn-delete" onclick="return confirm('Tem certeza que deseja excluir este compromisso?')">🗑️ Excluir</button>
+                        </form>
                     </div>
                 </div>
             <?php endforeach; ?>

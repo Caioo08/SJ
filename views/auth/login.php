@@ -104,6 +104,7 @@
       </div>
 
       <form method="POST" action="/login" novalidate>
+            <?= Csrf::field() ?>
         <div>
           <label for="email">Email</label>
           <input id="email" type="email" name="email" required placeholder="seu@exemplo.com">

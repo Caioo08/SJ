@@ -5,7 +5,6 @@ class DashboardController
 {
     public static function index()
     {
-        session_start();
         global $pdo;
 
         $usuario_id = $_SESSION['usuario_id'];
@@ -29,6 +28,19 @@ class DashboardController
         $stmt = $pdo->prepare("SELECT COUNT(*) AS abertos FROM processos WHERE usuario_id = ? AND status='aberto'");
         $stmt->execute([$usuario_id]);
         $processos_abertos = $stmt->fetch()['abertos'];
+
+
+        // Prazos críticos (próximas 48h)
+        $stmt = $pdo->prepare("
+            SELECT id, titulo, data_inicio, local
+            FROM compromissos
+            WHERE usuario_id = ?
+              AND data_inicio BETWEEN NOW() AND DATE_ADD(NOW(), INTERVAL 48 HOUR)
+            ORDER BY data_inicio ASC
+            LIMIT 5
+        ");
+        $stmt->execute([$usuario_id]);
+        $prazos_criticos = $stmt->fetchAll();
 
         // Próximos compromissos (7 dias)
         $stmt = $pdo->prepare("
