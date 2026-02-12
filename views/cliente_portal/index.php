@@ -45,6 +45,27 @@ h1{margin:0 0 8px;color:var(--acc)}.mut{color:var(--mut)}
       </table>
     <?php endif; ?>
   </div>
+
+  <div class="card">
+    <h2 style="margin-top:0">Documentos compartilhados</h2>
+    <?php if (empty($documentos)): ?>
+      <p class="mut">Nenhum documento compartilhado até o momento.</p>
+    <?php else: ?>
+      <table class="table">
+        <thead><tr><th>Documento</th><th>Categoria</th><th>Data</th></tr></thead>
+        <tbody>
+        <?php foreach($documentos as $d): ?>
+          <tr>
+            <td><?= htmlspecialchars($d['nome_original']) ?></td>
+            <td><?= ucfirst(htmlspecialchars($d['categoria'])) ?></td>
+            <td><?= date('d/m/Y', strtotime($d['criado_em'])) ?></td>
+          </tr>
+        <?php endforeach; ?>
+        </tbody>
+      </table>
+    <?php endif; ?>
+  </div>
+
 </div>
 </body>
 </html>

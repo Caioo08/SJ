@@ -325,22 +325,27 @@ h1 {
             <div class="card" style="margin-top: 24px;">
                 <h2>📅 Linha do Tempo</h2>
                 <div class="timeline">
-                    <div class="timeline-item">
-                        <div class="timeline-icon">📝</div>
-                        <div class="timeline-content">
-                            <div class="timeline-title">Processo Criado</div>
-                            <div class="timeline-date"><?= date('d/m/Y H:i', strtotime($processo['criado_em'])) ?></div>
+                    <?php if (empty($eventos)): ?>
+                        <div class="timeline-item">
+                            <div class="timeline-icon">ℹ️</div>
+                            <div class="timeline-content">
+                                <div class="timeline-title">Sem eventos registrados</div>
+                                <div class="timeline-date">Os próximos eventos deste processo aparecerão aqui.</div>
+                            </div>
                         </div>
-                    </div>
-
-                    <?php if($processo['atualizado_em'] != $processo['criado_em']): ?>
-                    <div class="timeline-item">
-                        <div class="timeline-icon">🔄</div>
-                        <div class="timeline-content">
-                            <div class="timeline-title">Última Atualização</div>
-                            <div class="timeline-date"><?= date('d/m/Y H:i', strtotime($processo['atualizado_em'])) ?></div>
-                        </div>
-                    </div>
+                    <?php else: ?>
+                        <?php foreach($eventos as $ev): ?>
+                            <div class="timeline-item">
+                                <div class="timeline-icon">📝</div>
+                                <div class="timeline-content">
+                                    <div class="timeline-title"><?= htmlspecialchars($ev['titulo']) ?></div>
+                                    <?php if(!empty($ev['descricao'])): ?>
+                                        <div style="color: var(--muted); font-size: 13px; margin: 4px 0 6px;"><?= htmlspecialchars($ev['descricao']) ?></div>
+                                    <?php endif; ?>
+                                    <div class="timeline-date"><?= date('d/m/Y H:i', strtotime($ev['criado_em'])) ?></div>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
                     <?php endif; ?>
                 </div>
             </div>

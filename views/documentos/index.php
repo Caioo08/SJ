@@ -435,6 +435,11 @@ h1 {
                         </div>
                     </div>
 
+                    <?php if(!empty($d['cliente_nome'])): ?>
+                        <div class="documento-descricao">👤 Cliente: <?= htmlspecialchars($d['cliente_nome']) ?></div>
+                    <?php endif; ?>
+                    <div class="documento-descricao">Portal cliente: <?= !empty($d['visivel_cliente']) ? '✅ Visível' : '🚫 Privado' ?></div>
+
                     <?php if($d['descricao']): ?>
                         <div class="documento-descricao">
                             <?= nl2br(htmlspecialchars($d['descricao'])) ?>

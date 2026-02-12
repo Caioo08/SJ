@@ -120,6 +120,9 @@ class ProcessosController
                 ':status'           => $status
             ]);
 
+            $processoId = (int) $pdo->lastInsertId();
+            self::registrarEvento($processoId, $usuario_id, 'Processo criado', 'Processo cadastrado no sistema.', 'criacao');
+
             header('Location: /processos');
             exit;
 
@@ -227,6 +230,8 @@ class ProcessosController
                 ':usuario_id'       => $usuario_id
             ]);
 
+            self::registrarEvento($id, $usuario_id, 'Processo atualizado', 'Dados do processo foram atualizados.', 'atualizacao');
+
             header('Location: /processos');
             exit;
 
@@ -270,6 +275,14 @@ class ProcessosController
 
         if (!$processo) {
             die("Processo não encontrado ou você não tem permissão.");
+        }
+
+        try {
+            $stmt = $pdo->prepare("SELECT titulo, descricao, tipo, criado_em FROM processo_eventos WHERE processo_id = ? ORDER BY criado_em DESC");
+            $stmt->execute([$id]);
+            $eventos = $stmt->fetchAll();
+        } catch (PDOException $e) {
+            $eventos = [];
         }
 
         require_once '../views/processos/show.php';
@@ -336,6 +349,8 @@ class ProcessosController
         if (!$stmt->fetch()) {
             die("Processo não encontrado ou você não tem permissão.");
         }
+
+        self::registrarEvento($id, $usuario_id, 'Processo excluído', 'Processo removido pelo advogado.', 'sistema');
 
         // Deletar processo
         $stmt = $pdo->prepare("DELETE FROM processos WHERE id = ? AND usuario_id = ?");

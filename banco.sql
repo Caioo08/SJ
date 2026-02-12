@@ -138,6 +138,30 @@ CREATE TABLE processos (
     INDEX idx_numero (numero_processo)
 ) ENGINE=InnoDB;
 
+
+
+-- ============================================
+-- TABELA: Eventos de Processo (Timeline)
+-- ============================================
+CREATE TABLE processo_eventos (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    processo_id INT NOT NULL,
+    usuario_id INT NOT NULL,
+    titulo VARCHAR(180) NOT NULL,
+    descricao TEXT,
+    tipo ENUM('criacao','atualizacao','status','comentario','sistema') DEFAULT 'sistema',
+    criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_eventos_processo
+        FOREIGN KEY (processo_id) REFERENCES processos(id) ON DELETE CASCADE,
+
+    CONSTRAINT fk_eventos_usuario
+        FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE,
+
+    INDEX idx_eventos_processo (processo_id),
+    INDEX idx_eventos_criado_em (criado_em)
+) ENGINE=InnoDB;
+
 -- ============================================
 -- TABELA: Compromissos
 -- ============================================
@@ -170,6 +194,8 @@ CREATE TABLE documentos (
     tipo VARCHAR(100),
     tamanho INT,
     categoria ENUM('processo','cliente','contrato','outros') DEFAULT 'outros',
+    cliente_id INT,
+    visivel_cliente BOOLEAN DEFAULT FALSE,
     descricao TEXT,
     caminho VARCHAR(500) NOT NULL,
     criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -178,8 +204,41 @@ CREATE TABLE documentos (
     CONSTRAINT fk_documentos_usuario
         FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE,
 
+    CONSTRAINT fk_documentos_cliente
+        FOREIGN KEY (cliente_id) REFERENCES clientes(id) ON DELETE SET NULL,
+
     INDEX idx_usuario (usuario_id),
-    INDEX idx_categoria (categoria)
+    INDEX idx_categoria (categoria),
+    INDEX idx_documentos_cliente (cliente_id),
+    INDEX idx_documentos_visivel_cliente (visivel_cliente)
+) ENGINE=InnoDB;
+
+
+
+-- ============================================
+-- TABELA: Prazos Processuais
+-- ============================================
+CREATE TABLE prazos (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    usuario_id INT NOT NULL,
+    processo_id INT,
+    titulo VARCHAR(180) NOT NULL,
+    descricao TEXT,
+    data_limite DATETIME NOT NULL,
+    prioridade ENUM('baixa','media','alta') DEFAULT 'media',
+    concluido BOOLEAN DEFAULT FALSE,
+    criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    atualizado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_prazos_usuario
+        FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE,
+
+    CONSTRAINT fk_prazos_processo
+        FOREIGN KEY (processo_id) REFERENCES processos(id) ON DELETE SET NULL,
+
+    INDEX idx_prazos_usuario (usuario_id),
+    INDEX idx_prazos_data_limite (data_limite),
+    INDEX idx_prazos_concluido (concluido)
 ) ENGINE=InnoDB;
 
 

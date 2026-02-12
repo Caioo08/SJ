@@ -256,6 +256,21 @@ a.btn:hover {
             <div class="form-section">
                 <h3>📝 Descrição</h3>
                 
+
+                <div class="form-group">
+                    <label for="cliente_id">Cliente vinculado (opcional)</label>
+                    <select id="cliente_id" name="cliente_id">
+                        <option value="">Sem vínculo</option>
+                        <?php foreach(($clientes ?? []) as $cli): ?>
+                            <option value="<?= $cli['id'] ?>"><?= htmlspecialchars($cli['nome']) ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+
+                <div class="form-group" style="display:flex; align-items:center; gap:10px;">
+                    <input type="checkbox" id="visivel_cliente" name="visivel_cliente" value="1" style="width:auto;">
+                    <label for="visivel_cliente" style="margin:0;">Disponibilizar no portal do cliente</label>
+                </div>
                 <div class="form-group">
                     <label for="descricao">Observações sobre o documento</label>
                     <textarea id="descricao" name="descricao" placeholder="Ex: Contrato de prestação de serviços do cliente João Silva..."></textarea>

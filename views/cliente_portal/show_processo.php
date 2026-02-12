@@ -24,6 +24,22 @@ body{margin:0;background:var(--bg);color:var(--txt);padding:24px}.wrap{max-width
     <p><strong><?= htmlspecialchars($processo['advogado_nome'] ?: 'Não informado') ?></strong></p>
     <p class="mut">Email: <?= htmlspecialchars($processo['advogado_email'] ?: '-') ?> • OAB: <?= htmlspecialchars($processo['oab'] ?: '-') ?></p>
   </div>
+
+  <div class="card">
+    <h3>Linha do tempo</h3>
+    <?php if (empty($eventos)): ?>
+      <p class="mut">Sem eventos registrados para este processo.</p>
+    <?php else: ?>
+      <?php foreach($eventos as $ev): ?>
+        <div style="padding:10px 0;border-bottom:1px solid var(--bd);">
+          <strong><?= htmlspecialchars($ev['titulo']) ?></strong>
+          <?php if(!empty($ev['descricao'])): ?><div class="mut" style="margin-top:4px;"><?= htmlspecialchars($ev['descricao']) ?></div><?php endif; ?>
+          <div class="mut" style="font-size:12px;"><?= date('d/m/Y H:i', strtotime($ev['criado_em'])) ?></div>
+        </div>
+      <?php endforeach; ?>
+    <?php endif; ?>
+  </div>
+
 </div>
 </body>
 </html>
