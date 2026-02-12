@@ -241,6 +241,34 @@ CREATE TABLE prazos (
     INDEX idx_prazos_concluido (concluido)
 ) ENGINE=InnoDB;
 
+
+
+-- ============================================
+-- TABELA: Prazos Processuais
+-- ============================================
+CREATE TABLE prazos (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    usuario_id INT NOT NULL,
+    processo_id INT,
+    titulo VARCHAR(180) NOT NULL,
+    descricao TEXT,
+    data_limite DATETIME NOT NULL,
+    prioridade ENUM('baixa','media','alta') DEFAULT 'media',
+    concluido BOOLEAN DEFAULT FALSE,
+    criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    atualizado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_prazos_usuario
+        FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE,
+
+    CONSTRAINT fk_prazos_processo
+        FOREIGN KEY (processo_id) REFERENCES processos(id) ON DELETE SET NULL,
+
+    INDEX idx_prazos_usuario (usuario_id),
+    INDEX idx_prazos_data_limite (data_limite),
+    INDEX idx_prazos_concluido (concluido)
+) ENGINE=InnoDB;
+
 -- ============================================
 -- TABELA: Log de Auditoria
 -- ============================================
