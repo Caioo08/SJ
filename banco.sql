@@ -241,6 +241,10 @@ CREATE TABLE prazos (
     INDEX idx_prazos_concluido (concluido)
 ) ENGINE=InnoDB;
 
+
+
+
+
 -- ============================================
 -- TABELA: Log de Auditoria
 -- ============================================
