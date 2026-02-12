@@ -89,6 +89,7 @@ CREATE TABLE clientes (
     nacionalidade VARCHAR(50) DEFAULT 'Brasileiro(a)',
     estado_civil ENUM('solteiro','casado','divorciado','viuvo','uniao_estavel'),
     email VARCHAR(150),
+    senha_hash VARCHAR(255),
     telefone VARCHAR(20),
     celular VARCHAR(20),
     cep VARCHAR(10),
@@ -107,7 +108,8 @@ CREATE TABLE clientes (
 
     INDEX idx_usuario (usuario_id),
     INDEX idx_nome (nome),
-    INDEX idx_cpf_cnpj (cpf_cnpj)
+    INDEX idx_cpf_cnpj (cpf_cnpj),
+    INDEX idx_clientes_email (email)
 ) ENGINE=InnoDB;
 
 -- ============================================
@@ -178,6 +180,34 @@ CREATE TABLE documentos (
 
     INDEX idx_usuario (usuario_id),
     INDEX idx_categoria (categoria)
+) ENGINE=InnoDB;
+
+
+
+-- ============================================
+-- TABELA: Prazos Processuais
+-- ============================================
+CREATE TABLE prazos (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    usuario_id INT NOT NULL,
+    processo_id INT,
+    titulo VARCHAR(180) NOT NULL,
+    descricao TEXT,
+    data_limite DATETIME NOT NULL,
+    prioridade ENUM('baixa','media','alta') DEFAULT 'media',
+    concluido BOOLEAN DEFAULT FALSE,
+    criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    atualizado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_prazos_usuario
+        FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE,
+
+    CONSTRAINT fk_prazos_processo
+        FOREIGN KEY (processo_id) REFERENCES processos(id) ON DELETE SET NULL,
+
+    INDEX idx_prazos_usuario (usuario_id),
+    INDEX idx_prazos_data_limite (data_limite),
+    INDEX idx_prazos_concluido (concluido)
 ) ENGINE=InnoDB;
 
 -- ============================================
