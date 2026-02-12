@@ -104,8 +104,8 @@ body{margin:0;background:radial-gradient(circle at top,#1b1b1b,#0b0b0b 55%);colo
           <small>Operação diária com processos, clientes e prazos.</small>
         </div>
         <div class="role">
-          <strong>Cliente (em breve)</strong>
-          <small>Área planejada para acompanhamento e interação.</small>
+          <strong>Cliente</strong>
+          <small>Acesso ao portal para visualizar processos vinculados.</small>
         </div>
       </div>
 

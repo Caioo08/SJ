@@ -219,6 +219,13 @@ a.btn:hover {
 <input type="text" id="telefone" name="telefone" value="<?= htmlspecialchars($cliente['telefone'] ?? '') ?>">
 </div>
 </div>
+
+<div class="form-row">
+<div class="form-group">
+<label>Redefinir senha de acesso do cliente (opcional)</label>
+<input type="password" name="senha_portal" placeholder="Preencha apenas para alterar a senha do portal">
+</div>
+</div>
 </div>
 
 <!-- Endereço -->

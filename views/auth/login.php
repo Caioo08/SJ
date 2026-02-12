@@ -60,8 +60,8 @@ input:focus,select:focus{outline:none;border-color:var(--acc);box-shadow:0 0 0 3
           <div class="role-desc">Opera processos, clientes, compromissos e prazos.</div>
         </div>
         <div class="role-card" data-role="cliente">
-          <div class="role-title">Cliente (em breve)</div>
-          <div class="role-desc">Portal de acompanhamento de demandas.</div>
+          <div class="role-title">Cliente</div>
+          <div class="role-desc">Acompanha processos vinculados e informações do caso.</div>
         </div>
       </div>
     </section>
@@ -80,9 +80,9 @@ input:focus,select:focus{outline:none;border-color:var(--acc);box-shadow:0 0 0 3
           <select id="perfil_acesso" name="perfil_acesso" required>
             <option value="admin" <?= ($acessoSelecionado ?? '') === 'admin' ? 'selected' : '' ?>>Administrador</option>
             <option value="advogado" <?= ($acessoSelecionado ?? '') === 'advogado' ? 'selected' : '' ?>>Advogado</option>
-            <option value="cliente" <?= ($acessoSelecionado ?? '') === 'cliente' ? 'selected' : '' ?>>Cliente (em breve)</option>
+            <option value="cliente" <?= ($acessoSelecionado ?? '') === 'cliente' ? 'selected' : '' ?>>Cliente</option>
           </select>
-          <div class="help">* Cliente estará disponível em uma próxima entrega.</div>
+          <div class="help">* Cliente: use email e senha definidos pelo advogado no cadastro do cliente.</div>
         </div>
 
         <div>

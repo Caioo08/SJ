@@ -330,13 +330,14 @@ tbody tr:hover {
                     <th>Email</th>
                     <th>Celular</th>
                     <th>Cidade/UF</th>
+                    <th>Portal</th>
                     <th>Ações</th>
                 </tr>
             </thead>
             <tbody>
                 <?php if(empty($clientes)): ?>
                     <tr>
-                        <td colspan="6">
+                        <td colspan="7">
                             <div class="empty-state">
                                 <div class="empty-icon">👥</div>
                                 <p>Nenhum cliente cadastrado ainda.</p>
@@ -352,6 +353,7 @@ tbody tr:hover {
                             <td><?= htmlspecialchars($c['email'] ?: '-') ?></td>
                             <td><?= htmlspecialchars($c['celular'] ?: '-') ?></td>
                             <td><?= htmlspecialchars($c['cidade'] ? $c['cidade'] . '/' . $c['uf'] : '-') ?></td>
+                            <td><?= !empty($c['senha_hash']) ? "✅ Ativo" : "⚠️ Sem acesso" ?></td>
                             <td>
                                 <a href="/clientes/<?= $c['id'] ?>" class="btn btn-small btn-view">👁️ Ver</a>
                                 <a href="/clientes/edit/<?= $c['id'] ?>" class="btn btn-small btn-edit">✏️ Editar</a>

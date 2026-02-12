@@ -89,6 +89,7 @@ CREATE TABLE clientes (
     nacionalidade VARCHAR(50) DEFAULT 'Brasileiro(a)',
     estado_civil ENUM('solteiro','casado','divorciado','viuvo','uniao_estavel'),
     email VARCHAR(150),
+    senha_hash VARCHAR(255),
     telefone VARCHAR(20),
     celular VARCHAR(20),
     cep VARCHAR(10),
@@ -107,7 +108,8 @@ CREATE TABLE clientes (
 
     INDEX idx_usuario (usuario_id),
     INDEX idx_nome (nome),
-    INDEX idx_cpf_cnpj (cpf_cnpj)
+    INDEX idx_cpf_cnpj (cpf_cnpj),
+    INDEX idx_clientes_email (email)
 ) ENGINE=InnoDB;
 
 -- ============================================

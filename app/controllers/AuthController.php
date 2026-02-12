@@ -84,13 +84,35 @@ class AuthController
             exit;
         }
 
-        if ($perfilAcesso === 'cliente') {
-            self::showError('Acesso de cliente em breve', 'A área do cliente ainda está em desenvolvimento. Use acesso Admin ou Advogado por enquanto.', '/login?acesso=cliente', 'warning');
-            exit;
-        }
 
         if (empty($email) || empty($senha)) {
             self::showError('Erro de validação', 'Preencha todos os campos para continuar.', '/login');
+            exit;
+        }
+
+        if ($perfilAcesso === 'cliente') {
+            $stmt = $pdo->prepare("SELECT c.*, u.nome AS advogado_nome FROM clientes c LEFT JOIN usuarios u ON c.usuario_id = u.id WHERE c.email = ? LIMIT 2");
+            $stmt->execute([$email]);
+            $clientes = $stmt->fetchAll();
+
+            if (count($clientes) !== 1) {
+                self::showError('Acesso de cliente indisponível', 'Não foi possível identificar uma conta de cliente única com este email. Contate seu advogado.', '/login?acesso=cliente', 'warning');
+                exit;
+            }
+
+            $cliente = $clientes[0];
+            if (empty($cliente['senha_hash']) || !password_verify($senha, $cliente['senha_hash'])) {
+                self::showError('Credenciais inválidas', 'Email ou senha do cliente incorretos.', '/login?acesso=cliente');
+                exit;
+            }
+
+            $_SESSION['cliente_id'] = $cliente['id'];
+            $_SESSION['cliente_nome'] = $cliente['nome'];
+            $_SESSION['cliente_advogado'] = $cliente['advogado_nome'] ?? null;
+            $_SESSION['perfil_id'] = 3;
+            $_SESSION['usuario_id'] = null;
+
+            header('Location: /cliente');
             exit;
         }
 

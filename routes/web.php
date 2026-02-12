@@ -359,6 +359,22 @@ elseif ($uri === '/configuracoes/atualizar-escritorio' && $method === 'POST') {
     ConfiguracoesController::updateEscritorio();
 }
 
+
+// ==================== PORTAL DO CLIENTE ====================
+
+elseif ($uri === '/cliente') {
+    AuthMiddleware::verificarCliente();
+    require_once '../app/controllers/ClientePortalController.php';
+    ClientePortalController::index();
+}
+
+elseif (preg_match('#^/cliente/processos/(\d+)$#', $uri, $matches) && $method === 'GET') {
+    AuthMiddleware::verificarCliente();
+    $id = $matches[1];
+    require_once '../app/controllers/ClientePortalController.php';
+    ClientePortalController::showProcesso($id);
+}
+
 // ==================== LOGOUT ====================
 
 elseif ($uri === '/logout') {
@@ -375,8 +391,10 @@ elseif ($uri === '/') {
     if (isset($_SESSION['usuario_id']) && isset($_SESSION['perfil_id'])) {
         if ($_SESSION['perfil_id'] == 1) {
             header('Location: /admin');
-        } else {
+        } elseif ($_SESSION['perfil_id'] == 2) {
             header('Location: /dashboard');
+        } else {
+            header('Location: /cliente');
         }
         exit;
     }

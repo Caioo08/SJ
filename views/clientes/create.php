@@ -257,6 +257,14 @@ a.btn:hover {
                         <input type="text" id="telefone" name="telefone" placeholder="(00) 0000-0000">
                     </div>
                 </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="senha_portal">Senha de acesso do cliente (opcional)</label>
+                        <input type="password" id="senha_portal" name="senha_portal" placeholder="Defina para liberar o portal do cliente">
+                        <div class="help-text">Para login do cliente, informe email e senha.</div>
+                    </div>
+                </div>
             </div>
 
             <!-- Endereço -->
