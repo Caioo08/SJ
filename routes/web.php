@@ -7,16 +7,9 @@ require_once '../app/helpers/Audit.php';
 $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $method = $_SERVER['REQUEST_METHOD'];
 
-// ==================== CRIAR ADMIN (APENAS PARA INSTALAÇÃO) ====================
-
-if ($uri === '/criar-admin') {
-    require_once '../criar_admin.php';
-    exit;
-}
-
 // ==================== AUTENTICAÇÃO ====================
 
-elseif ($uri === '/login' && $method === 'GET') {
+if ($uri === '/login' && $method === 'GET') {
     AuthController::loginForm();
 }
 elseif ($uri === '/login' && $method === 'POST') {

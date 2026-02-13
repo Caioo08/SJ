@@ -79,6 +79,17 @@ class DashboardController
             $total_prazos_abertos = 0;
         }
 
+
+        // Datas de prazo em aberto para marcação no calendário
+        $prazos_calendario = [];
+        try {
+            $stmt = $pdo->prepare("SELECT data_limite FROM prazos WHERE usuario_id = ? AND concluido = 0");
+            $stmt->execute([$usuario_id]);
+            $prazos_calendario = $stmt->fetchAll();
+        } catch (PDOException $e) {
+            $prazos_calendario = [];
+        }
+
         // Próximos compromissos (7 dias)
         $stmt = $pdo->prepare("
             SELECT id, titulo, descricao, data_inicio, data_fim, local

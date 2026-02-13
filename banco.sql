@@ -77,6 +77,11 @@ CREATE TABLE usuarios (
     INDEX idx_ativo (ativo)
 ) ENGINE=InnoDB;
 
+
+-- Usuário administrador padrão (altere a senha após o primeiro acesso)
+INSERT INTO usuarios (nome, email, senha_hash, perfil_id, ativo)
+VALUES ('Administrador', 'admin@sistema.com', '$2y$12$aCefn3YEX9Kl0PgqDlKsquoZE2op0pFQ763Uw.PtZbKlMeJvHgviu', 1, 1);
+
 -- ============================================
 -- TABELA: Clientes
 -- ============================================

@@ -370,6 +370,19 @@ body {
     background: #0b0b0b;
 }
 
+.calendar-day.has-deadline {
+    box-shadow: inset 0 0 0 2px rgba(239, 68, 68, 0.7);
+}
+
+.calendar-day.has-deadline::before {
+    content: '⚠';
+    position: absolute;
+    top: 2px;
+    right: 4px;
+    color: #f87171;
+    font-size: 10px;
+}
+
 /* Appointments Section */
 .appointments-section {
     background: var(--card);
@@ -727,6 +740,10 @@ body {
         <section class="calendar-section">
             <div class="section-header">
                 <h2 class="section-title">Calendário</h2>
+                <div style="display:flex;gap:10px;align-items:center;font-size:12px;color:var(--muted);">
+                    <span style="display:inline-flex;align-items:center;gap:4px;"><span style="color:var(--accent);font-size:16px;">•</span>Compromissos</span>
+                    <span style="display:inline-flex;align-items:center;gap:4px;"><span style="color:#f87171;">⚠</span>Prazos</span>
+                </div>
             </div>
             <div class="calendar">
                 <div class="calendar-header">
@@ -767,9 +784,12 @@ updateDateTime();
 setInterval(updateDateTime, 60000);
 
 // Calendar functionality
-const compromissos = <?= json_encode(array_map(function($c) {
+const compromissos = <?= json_encode(array_values(array_unique(array_map(function($c) {
     return date('Y-m-d', strtotime($c['data_inicio']));
-}, $compromissos)) ?>;
+}, $compromissos)))) ?>;
+const prazos = <?= json_encode(array_values(array_unique(array_map(function($p) {
+    return date('Y-m-d', strtotime($p['data_limite']));
+}, $prazos_calendario)))) ?>;
 
 let currentDate = new Date();
 
@@ -815,6 +835,10 @@ function renderCalendar() {
         
         if (compromissos.includes(dateStr)) {
             dayEl.classList.add('has-event');
+        }
+
+        if (prazos.includes(dateStr)) {
+            dayEl.classList.add('has-deadline');
         }
         
         calendarDays.appendChild(dayEl);
