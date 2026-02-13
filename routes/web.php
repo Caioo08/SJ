@@ -2,6 +2,7 @@
 
 require_once '../app/controllers/AuthController.php';
 require_once '../app/helpers/AuthMiddleware.php';
+require_once '../app/helpers/Audit.php';
 
 $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $method = $_SERVER['REQUEST_METHOD'];
@@ -378,6 +379,10 @@ elseif (preg_match('#^/cliente/processos/(\d+)$#', $uri, $matches) && $method ==
 // ==================== LOGOUT ====================
 
 elseif ($uri === '/logout') {
+    if (isset($_SESSION['usuario_id']) && !empty($_SESSION['usuario_id'])) {
+        Audit::registrar('Logout usuário', 'usuarios', (int) $_SESSION['usuario_id'], null);
+    }
+
     $_SESSION = [];
     session_destroy();
     header('Location: /login');

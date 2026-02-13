@@ -1,6 +1,7 @@
 <?php
 
 require_once '../config/database.php';
+require_once '../app/helpers/Audit.php';
 
 class AdminController
 {
@@ -11,27 +12,6 @@ class AdminController
         AuthMiddleware::verificarAdmin();
     }
 
-    // Registrar log de auditoria
-    private static function registrarLog($acao, $tabela = null, $registro_id = null, $detalhes = null)
-    {
-        global $pdo;
-
-        $ip = $_SERVER['REMOTE_ADDR'] ?? 'desconhecido';
-
-        $stmt = $pdo->prepare("
-            INSERT INTO logs_auditoria (usuario_id, acao, tabela, registro_id, detalhes, ip_address)
-            VALUES (:usuario_id, :acao, :tabela, :registro_id, :detalhes, :ip)
-        ");
-
-        $stmt->execute([
-            ':usuario_id' => $_SESSION['usuario_id'],
-            ':acao' => $acao,
-            ':tabela' => $tabela,
-            ':registro_id' => $registro_id,
-            ':detalhes' => $detalhes,
-            ':ip' => $ip
-        ]);
-    }
 
     // Dashboard admin
     public static function index()
@@ -126,7 +106,7 @@ class AdminController
 
         // Registrar log
         $acao = $novo_status ? 'Usuário ativado' : 'Usuário desativado';
-        self::registrarLog($acao, 'usuarios', $id, "Usuário: {$usuario['nome']}");
+        Audit::registrar($acao, 'usuarios', (int) $id, "Usuário: {$usuario['nome']}");
 
         // Redirecionar com mensagem
         $msg = $novo_status ? 'ativado' : 'desativado';
@@ -185,7 +165,7 @@ class AdminController
         $stmt = $pdo->prepare("DELETE FROM usuarios WHERE id = ?");
         $stmt->execute([$id]);
 
-        self::registrarLog("Usuário excluído", 'usuarios', $id, "Usuário: {$usuario['nome']}");
+        Audit::registrar("Usuário excluído", 'usuarios', (int) $id, "Usuário: {$usuario['nome']}");
 
         header('Location: /admin/usuarios?msg=excluido');
         exit;

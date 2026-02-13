@@ -1,6 +1,7 @@
 <?php
 
 require_once '../config/database.php';
+require_once '../app/helpers/Audit.php';
 
 
 class AuthController
@@ -112,6 +113,8 @@ class AuthController
             $_SESSION['perfil_id'] = 3;
             $_SESSION['usuario_id'] = null;
 
+            Audit::registrar('Login cliente', 'clientes', (int) $cliente['id'], 'Email: ' . $email);
+
             header('Location: /cliente');
             exit;
         }
@@ -155,6 +158,8 @@ class AuthController
         $_SESSION['usuario_id'] = $usuario['id'];
         $_SESSION['usuario_nome'] = $usuario['nome'];
         $_SESSION['perfil_id'] = $usuario['perfil_id']; // ← ADICIONADO
+
+        Audit::registrar('Login usuário', 'usuarios', (int) $usuario['id'], 'Perfil: ' . (int) $usuario['perfil_id']);
 
         // Redirecionar baseado no perfil
         if ($usuario['perfil_id'] == 1) {
