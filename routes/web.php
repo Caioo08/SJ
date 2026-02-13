@@ -2,20 +2,14 @@
 
 require_once '../app/controllers/AuthController.php';
 require_once '../app/helpers/AuthMiddleware.php';
+require_once '../app/helpers/Audit.php';
 
 $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $method = $_SERVER['REQUEST_METHOD'];
 
-// ==================== CRIAR ADMIN (APENAS PARA INSTALAÇÃO) ====================
-
-if ($uri === '/criar-admin') {
-    require_once '../criar_admin.php';
-    exit;
-}
-
 // ==================== AUTENTICAÇÃO ====================
 
-elseif ($uri === '/login' && $method === 'GET') {
+if ($uri === '/login' && $method === 'GET') {
     AuthController::loginForm();
 }
 elseif ($uri === '/login' && $method === 'POST') {
@@ -49,7 +43,7 @@ elseif (preg_match('#^/admin/usuarios/(\d+)$#', $uri, $matches) && $method === '
     AdminController::verUsuario($id);
 }
 
-elseif (preg_match('#^/admin/usuarios/toggle/(\d+)$#', $uri, $matches)) {
+elseif (preg_match('#^/admin/usuarios/toggle/(\d+)$#', $uri, $matches) && $method === 'POST') {
     AuthMiddleware::verificarAdmin();
     $id = $matches[1];
     require_once '../app/controllers/AdminController.php';
@@ -236,7 +230,7 @@ elseif (preg_match('#^/compromissos/update/(\d+)$#', $uri, $matches) && $method 
     CompromissosController::update($id);
 }
 
-elseif (preg_match('#^/compromissos/delete/(\d+)$#', $uri, $matches)) {
+elseif (preg_match('#^/compromissos/delete/(\d+)$#', $uri, $matches) && $method === 'POST') {
     AuthMiddleware::verificarAdvogado();
     $id = $matches[1];
     require_once '../app/controllers/CompromissosController.php';
@@ -263,18 +257,68 @@ elseif ($uri === '/documentos/store' && $method === 'POST') {
     DocumentosController::store();
 }
 
-elseif (preg_match('#^/documentos/download/(\d+)$#', $uri, $matches)) {
+elseif (preg_match('#^/documentos/download/(\d+)$#', $uri, $matches) && $method === 'GET') {
     AuthMiddleware::verificarAdvogado();
     $id = $matches[1];
     require_once '../app/controllers/DocumentosController.php';
     DocumentosController::download($id);
 }
 
-elseif (preg_match('#^/documentos/delete/(\d+)$#', $uri, $matches)) {
+elseif (preg_match('#^/documentos/delete/(\d+)$#', $uri, $matches) && $method === 'POST') {
     AuthMiddleware::verificarAdvogado();
     $id = $matches[1];
     require_once '../app/controllers/DocumentosController.php';
     DocumentosController::delete($id);
+}
+
+
+// ==================== PRAZOS (APENAS ADVOGADOS) ====================
+
+elseif ($uri === '/prazos') {
+    AuthMiddleware::verificarAdvogado();
+    require_once '../app/controllers/PrazosController.php';
+    PrazosController::index();
+}
+
+elseif ($uri === '/prazos/novo' && $method === 'GET') {
+    AuthMiddleware::verificarAdvogado();
+    require_once '../app/controllers/PrazosController.php';
+    PrazosController::create();
+}
+
+
+elseif (preg_match('#^/prazos/edit/(\d+)$#', $uri, $matches) && $method === 'GET') {
+    AuthMiddleware::verificarAdvogado();
+    $id = $matches[1];
+    require_once '../app/controllers/PrazosController.php';
+    PrazosController::edit($id);
+}
+
+elseif (preg_match('#^/prazos/update/(\d+)$#', $uri, $matches) && $method === 'POST') {
+    AuthMiddleware::verificarAdvogado();
+    $id = $matches[1];
+    require_once '../app/controllers/PrazosController.php';
+    PrazosController::update($id);
+}
+
+elseif ($uri === '/prazos/store' && $method === 'POST') {
+    AuthMiddleware::verificarAdvogado();
+    require_once '../app/controllers/PrazosController.php';
+    PrazosController::store();
+}
+
+elseif (preg_match('#^/prazos/toggle/(\d+)$#', $uri, $matches) && $method === 'POST') {
+    AuthMiddleware::verificarAdvogado();
+    $id = $matches[1];
+    require_once '../app/controllers/PrazosController.php';
+    PrazosController::toggleConclusao($id);
+}
+
+elseif (preg_match('#^/prazos/delete/(\d+)$#', $uri, $matches) && $method === 'POST') {
+    AuthMiddleware::verificarAdvogado();
+    $id = $matches[1];
+    require_once '../app/controllers/PrazosController.php';
+    PrazosController::delete($id);
 }
 
 // ==================== CONFIGURAÇÕES (APENAS ADVOGADOS) ====================
@@ -309,9 +353,29 @@ elseif ($uri === '/configuracoes/atualizar-escritorio' && $method === 'POST') {
     ConfiguracoesController::updateEscritorio();
 }
 
+
+// ==================== PORTAL DO CLIENTE ====================
+
+elseif ($uri === '/cliente') {
+    AuthMiddleware::verificarCliente();
+    require_once '../app/controllers/ClientePortalController.php';
+    ClientePortalController::index();
+}
+
+elseif (preg_match('#^/cliente/processos/(\d+)$#', $uri, $matches) && $method === 'GET') {
+    AuthMiddleware::verificarCliente();
+    $id = $matches[1];
+    require_once '../app/controllers/ClientePortalController.php';
+    ClientePortalController::showProcesso($id);
+}
+
 // ==================== LOGOUT ====================
 
 elseif ($uri === '/logout') {
+    if (isset($_SESSION['usuario_id']) && !empty($_SESSION['usuario_id'])) {
+        Audit::registrar('Logout usuário', 'usuarios', (int) $_SESSION['usuario_id'], null);
+    }
+
     $_SESSION = [];
     session_destroy();
     header('Location: /login');
@@ -321,16 +385,19 @@ elseif ($uri === '/logout') {
 // ==================== ROTA PADRÃO ====================
 
 elseif ($uri === '/') {
-    // Redireciona baseado no perfil se já estiver logado
+    // Se já estiver logado, redireciona por perfil; senão exibe página inicial pública.
     if (isset($_SESSION['usuario_id']) && isset($_SESSION['perfil_id'])) {
         if ($_SESSION['perfil_id'] == 1) {
             header('Location: /admin');
-        } else {
+        } elseif ($_SESSION['perfil_id'] == 2) {
             header('Location: /dashboard');
+        } else {
+            header('Location: /cliente');
         }
-    } else {
-        header('Location: /login');
+        exit;
     }
+
+    require_once '../views/home.php';
     exit;
 }
 else {
