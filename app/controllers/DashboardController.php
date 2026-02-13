@@ -33,7 +33,7 @@ class DashboardController
         // Alertas de prazos (D-7, D-3, D-1 e vencidos)
         $prazos_criticos = [];
         $total_prazos_abertos = 0;
-        $alertas_prazos = ['d7' => 0, 'd3' => 0, 'd1' => 0, 'vencidos' => 0];
+        $alertas_prazos = ['d7' => 0, 'd3' => 0, 'd1' => 0, 'vencidos' => 0, 'em_dia' => 0];
         try {
             $stmt = $pdo->prepare("
                 SELECT id, titulo, data_limite, prioridade,
@@ -47,9 +47,8 @@ class DashboardController
                 FROM prazos
                 WHERE usuario_id = ?
                   AND concluido = 0
-                  AND data_limite <= DATE_ADD(NOW(), INTERVAL 7 DAY)
                 ORDER BY data_limite ASC
-                LIMIT 12
+                LIMIT 20
             ");
             $stmt->execute([$usuario_id]);
             $prazos_criticos = $stmt->fetchAll();
@@ -72,6 +71,7 @@ class DashboardController
                 'd3' => (int) ($alertas['d3'] ?? 0),
                 'd1' => (int) ($alertas['d1'] ?? 0),
                 'vencidos' => (int) ($alertas['vencidos'] ?? 0),
+                'em_dia' => max(0, $total_prazos_abertos - ((int) ($alertas['d7'] ?? 0) + (int) ($alertas['d3'] ?? 0) + (int) ($alertas['d1'] ?? 0) + (int) ($alertas['vencidos'] ?? 0))),
             ];
         } catch (PDOException $e) {
             // Mantém dashboard funcional caso tabela ainda não tenha sido aplicada no banco.

@@ -680,13 +680,14 @@ body {
 
     <section class="info-section">
         <div class="section-header">
-            <h2 class="section-title">Alertas de Prazo (D-7, D-3, D-1 e vencidos)</h2>
+            <h2 class="section-title">Alertas de Prazo</h2>
         </div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
             <span style="padding:4px 10px;border-radius:999px;background:rgba(74,158,255,.2);color:#4a9eff;font-size:12px;font-weight:700;">D-7: <?= (int)($alertas_prazos['d7'] ?? 0) ?></span>
             <span style="padding:4px 10px;border-radius:999px;background:rgba(212,175,55,.2);color:#d4af37;font-size:12px;font-weight:700;">D-3: <?= (int)($alertas_prazos['d3'] ?? 0) ?></span>
             <span style="padding:4px 10px;border-radius:999px;background:rgba(249,115,22,.2);color:#fb923c;font-size:12px;font-weight:700;">D-1: <?= (int)($alertas_prazos['d1'] ?? 0) ?></span>
             <span style="padding:4px 10px;border-radius:999px;background:rgba(239,68,68,.2);color:#ef4444;font-size:12px;font-weight:700;">Vencidos: <?= (int)($alertas_prazos['vencidos'] ?? 0) ?></span>
+            <span style="padding:4px 10px;border-radius:999px;background:rgba(74,222,128,.2);color:#4ade80;font-size:12px;font-weight:700;">Em dia: <?= (int)($alertas_prazos['em_dia'] ?? 0) ?></span>
         </div>
         <?php if(empty($prazos_criticos)): ?>
             <div class="empty-state" style="padding:20px;">✅ Nenhum prazo crítico nos próximos 7 dias.</div>
@@ -787,9 +788,19 @@ setInterval(updateDateTime, 60000);
 const compromissos = <?= json_encode(array_values(array_unique(array_map(function($c) {
     return date('Y-m-d', strtotime($c['data_inicio']));
 }, $compromissos)))) ?>;
-const prazos = <?= json_encode(array_values(array_unique(array_map(function($p) {
-    return date('Y-m-d', strtotime($p['data_limite']));
-}, $prazos_calendario)))) ?>;
+const prazos = <?= json_encode(array_values(array_unique(array_filter(array_map(function($p) {
+    $raw = (string)($p['data_limite'] ?? '');
+    if ($raw === '') {
+        return null;
+    }
+
+    if (preg_match('/^\d{4}-\d{2}-\d{2}/', $raw, $m)) {
+        return $m[0];
+    }
+
+    $ts = strtotime($raw);
+    return $ts ? date('Y-m-d', $ts) : null;
+}, $prazos_calendario))))) ?>;
 
 let currentDate = new Date();
 
