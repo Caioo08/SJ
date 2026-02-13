@@ -1,6 +1,7 @@
 <?php
 
 require_once '../config/database.php';
+require_once '../app/helpers/Audit.php';
 
 class ClientesController
 {
@@ -163,6 +164,8 @@ class ClientesController
                 ':observacoes'  => $observacoes
             ]);
 
+            Audit::registrar('Cliente criado', 'clientes', (int) $pdo->lastInsertId(), 'Nome: ' . $nome);
+
             header('Location: /clientes');
             exit;
         } catch (PDOException $e) {
@@ -287,6 +290,8 @@ class ClientesController
 
             $stmt->execute($params);
 
+            Audit::registrar('Cliente atualizado', 'clientes', (int) $id, 'Nome: ' . $nome);
+
             header('Location: /clientes/' . $id);
             exit;
         } catch (PDOException $e) {
@@ -350,15 +355,18 @@ class ClientesController
         }
 
         // Verificar se o cliente pertence ao usuário
-        $stmt = $pdo->prepare("SELECT id FROM clientes WHERE id = ? AND usuario_id = ?");
+        $stmt = $pdo->prepare("SELECT id, nome FROM clientes WHERE id = ? AND usuario_id = ?");
         $stmt->execute([$id, $usuario_id]);
-        if (!$stmt->fetch()) {
+        $cliente = $stmt->fetch();
+        if (!$cliente) {
             die("Cliente não encontrado ou você não tem permissão.");
         }
 
         // Deletar cliente (processos vinculados terão cliente_id definido como NULL devido ao ON DELETE SET NULL)
         $stmt = $pdo->prepare("DELETE FROM clientes WHERE id = ? AND usuario_id = ?");
         $stmt->execute([$id, $usuario_id]);
+
+        Audit::registrar('Cliente excluído', 'clientes', (int) $id, 'Nome: ' . ($cliente['nome'] ?? ''));
 
         header('Location: /clientes?deleted=1');
         exit;
