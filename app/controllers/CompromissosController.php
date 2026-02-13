@@ -1,6 +1,7 @@
 <?php
 
 require_once '../config/database.php';
+require_once '../app/helpers/Audit.php';
 
 class CompromissosController
 {
@@ -78,6 +79,8 @@ class CompromissosController
                 ':local' => $local
             ]);
 
+            Audit::registrar('Compromisso criado', 'compromissos', (int) $pdo->lastInsertId(), 'Título: ' . $titulo);
+
             header('Location: /compromissos');
             exit;
 
@@ -153,6 +156,8 @@ class CompromissosController
                 ':usuario_id' => $usuario_id
             ]);
 
+            Audit::registrar('Compromisso atualizado', 'compromissos', (int) $id, 'Título: ' . $titulo);
+
             header('Location: /compromissos');
             exit;
 
@@ -173,8 +178,18 @@ class CompromissosController
 
         $usuario_id = $_SESSION['usuario_id'];
 
+        $stmt = $pdo->prepare("SELECT titulo FROM compromissos WHERE id = ? AND usuario_id = ?");
+        $stmt->execute([$id, $usuario_id]);
+        $compromisso = $stmt->fetch();
+
+        if (!$compromisso) {
+            die("Compromisso não encontrado ou você não tem permissão.");
+        }
+
         $stmt = $pdo->prepare("DELETE FROM compromissos WHERE id = ? AND usuario_id = ?");
         $stmt->execute([$id, $usuario_id]);
+
+        Audit::registrar('Compromisso excluído', 'compromissos', (int) $id, 'Título: ' . ($compromisso['titulo'] ?? ''));
 
         header('Location: /compromissos');
         exit;

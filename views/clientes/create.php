@@ -195,6 +195,7 @@ a.btn:hover {
     <div class="card">
         <h1>📋 Novo Cliente</h1>
         <form action="/clientes/store" method="POST">
+            <?= Csrf::field() ?>
             
             <!-- Dados Pessoais -->
             <div class="form-section">
@@ -254,6 +255,14 @@ a.btn:hover {
                     <div class="form-group">
                         <label for="telefone">Telefone</label>
                         <input type="text" id="telefone" name="telefone" placeholder="(00) 0000-0000">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="senha_portal">Senha de acesso do cliente (opcional)</label>
+                        <input type="password" id="senha_portal" name="senha_portal" placeholder="Defina para liberar o portal do cliente">
+                        <div class="help-text">Para login do cliente, informe email e senha.</div>
                     </div>
                 </div>
             </div>
