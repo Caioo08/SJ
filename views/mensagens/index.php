@@ -17,6 +17,8 @@
 .msg.adv{margin-left:auto;background:rgba(212,175,55,.2)}
 .msg.cli{background:rgba(255,255,255,.07)}
 .meta{font-size:12px;color:var(--mut);margin-top:4px}
+.badge{display:inline-block;background:#ef4444;color:white;border-radius:999px;padding:2px 8px;font-size:11px;font-weight:700;margin-left:6px}
+.alert{background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.4);color:#fecaca;padding:10px;border-radius:8px;margin:10px 0}
 form{display:flex;gap:8px;margin-top:10px}textarea{flex:1;background:#141414;border:1px solid var(--bd);color:var(--txt);padding:10px;border-radius:10px}button{background:var(--acc);border:none;padding:10px 14px;border-radius:10px;font-weight:700}
 .top{display:flex;justify-content:space-between;align-items:center;gap:10px}
 .btn{color:#0b0b0b;background:var(--acc);padding:8px 12px;border-radius:8px;text-decoration:none;font-weight:700}
@@ -28,13 +30,21 @@ form{display:flex;gap:8px;margin-top:10px}textarea{flex:1;background:#141414;bor
   <aside class="panel">
     <div class="top"><h2 style="margin:0">Mensagens</h2><a href="/dashboard" class="btn">Dashboard</a></div>
     <p style="color:var(--mut)">Conversa com clientes</p>
+    <?php if (!empty($_GET['erro'])): ?>
+      <div class="alert">Não foi possível enviar a mensagem. Verifique os dados e tente novamente.</div>
+    <?php endif; ?>
     <?php if (empty($clientes)): ?>
       <p style="color:var(--mut)">Nenhum cliente cadastrado.</p>
     <?php else: ?>
       <?php foreach($clientes as $c): ?>
         <a class="cliente <?= (int)$clienteSelecionado === (int)$c['id'] ? 'active' : '' ?>" href="/mensagens?cliente_id=<?= $c['id'] ?>">
           <strong><?= htmlspecialchars($c['nome']) ?></strong>
-          <div class="meta"><?= htmlspecialchars($c['email'] ?: 'sem email') ?></div>
+          <div class="meta">
+            <?= htmlspecialchars($c['email'] ?: 'sem email') ?>
+            <?php if ((int)($c['nao_lidas'] ?? 0) > 0): ?>
+              <span class="badge"><?= (int)$c['nao_lidas'] ?></span>
+            <?php endif; ?>
+          </div>
         </a>
       <?php endforeach; ?>
     <?php endif; ?>

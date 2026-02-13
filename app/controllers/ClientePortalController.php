@@ -39,9 +39,19 @@ class ClientePortalController
         }
 
         try {
-            $stmt = $pdo->prepare("SELECT * FROM mensagens_cliente WHERE cliente_id = ? ORDER BY criado_em DESC LIMIT 10");
+            $stmt = $pdo->prepare("SELECT id, autor_tipo, mensagem, lida, criado_em
+                FROM mensagens_cliente
+                WHERE cliente_id = ?
+                ORDER BY criado_em ASC
+                LIMIT 50");
             $stmt->execute([$cliente_id]);
             $mensagens = $stmt->fetchAll();
+
+            $stmt = $pdo->prepare("UPDATE mensagens_cliente
+                SET lida = 1
+                WHERE cliente_id = ?
+                  AND autor_tipo = 'advogado'");
+            $stmt->execute([$cliente_id]);
         } catch (PDOException $e) {
             $mensagens = [];
         }
@@ -63,6 +73,10 @@ class ClientePortalController
 
         if ($mensagem === '') {
             die('Mensagem não pode estar vazia.');
+        }
+
+        if (mb_strlen($mensagem) > 4000) {
+            die('Mensagem excede o limite de 4000 caracteres.');
         }
 
         $stmt = $pdo->prepare("SELECT usuario_id FROM clientes WHERE id = ?");

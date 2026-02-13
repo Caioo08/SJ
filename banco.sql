@@ -293,6 +293,7 @@ CREATE TABLE prazo_historico (
 ) ENGINE=InnoDB;
 
 
+
 -- ============================================
 -- TABELA: Histórico de Alterações de Prazos
 -- ============================================

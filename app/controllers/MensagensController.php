@@ -14,11 +14,29 @@ class MensagensController
             exit;
         }
 
-        $usuario_id = $_SESSION['usuario_id'];
+        $usuario_id = (int) $_SESSION['usuario_id'];
         $clienteSelecionado = isset($_GET['cliente_id']) ? (int) $_GET['cliente_id'] : 0;
 
-        $stmt = $pdo->prepare("SELECT c.id, c.nome, c.email,
-            (SELECT m.criado_em FROM mensagens_cliente m WHERE m.cliente_id = c.id ORDER BY m.criado_em DESC LIMIT 1) as ultima_msg_em
+        $stmt = $pdo->prepare("SELECT
+                c.id,
+                c.nome,
+                c.email,
+                (
+                    SELECT m.criado_em
+                    FROM mensagens_cliente m
+                    WHERE m.cliente_id = c.id
+                      AND m.usuario_id = c.usuario_id
+                    ORDER BY m.criado_em DESC
+                    LIMIT 1
+                ) AS ultima_msg_em,
+                (
+                    SELECT COUNT(*)
+                    FROM mensagens_cliente m2
+                    WHERE m2.cliente_id = c.id
+                      AND m2.usuario_id = c.usuario_id
+                      AND m2.autor_tipo = 'cliente'
+                      AND m2.lida = 0
+                ) AS nao_lidas
             FROM clientes c
             WHERE c.usuario_id = ?
             ORDER BY COALESCE(ultima_msg_em, c.criado_em) DESC, c.nome ASC");
@@ -38,12 +56,19 @@ class MensagensController
             $clienteAtual = $stmt->fetch();
 
             if ($clienteAtual) {
-                $stmt = $pdo->prepare("SELECT * FROM mensagens_cliente WHERE cliente_id = ? ORDER BY criado_em ASC");
-                $stmt->execute([$clienteSelecionado]);
+                $stmt = $pdo->prepare("SELECT id, autor_tipo, mensagem, lida, criado_em
+                    FROM mensagens_cliente
+                    WHERE cliente_id = ? AND usuario_id = ?
+                    ORDER BY criado_em ASC");
+                $stmt->execute([$clienteSelecionado, $usuario_id]);
                 $mensagens = $stmt->fetchAll();
 
-                $stmt = $pdo->prepare("UPDATE mensagens_cliente SET lida = 1 WHERE cliente_id = ? AND autor_tipo = 'cliente'");
-                $stmt->execute([$clienteSelecionado]);
+                $stmt = $pdo->prepare("UPDATE mensagens_cliente
+                    SET lida = 1
+                    WHERE cliente_id = ?
+                      AND usuario_id = ?
+                      AND autor_tipo = 'cliente'");
+                $stmt->execute([$clienteSelecionado, $usuario_id]);
             }
         }
 
@@ -59,18 +84,25 @@ class MensagensController
             exit;
         }
 
-        $usuario_id = $_SESSION['usuario_id'];
+        $usuario_id = (int) $_SESSION['usuario_id'];
         $cliente_id = isset($_POST['cliente_id']) ? (int) $_POST['cliente_id'] : 0;
         $mensagem = trim($_POST['mensagem'] ?? '');
 
         if ($cliente_id <= 0 || $mensagem === '') {
-            die('Cliente e mensagem são obrigatórios.');
+            header('Location: /mensagens?erro=mensagem_obrigatoria');
+            exit;
+        }
+
+        if (mb_strlen($mensagem) > 4000) {
+            header('Location: /mensagens?cliente_id=' . $cliente_id . '&erro=mensagem_grande');
+            exit;
         }
 
         $stmt = $pdo->prepare("SELECT id FROM clientes WHERE id = ? AND usuario_id = ?");
         $stmt->execute([$cliente_id, $usuario_id]);
         if (!$stmt->fetch()) {
-            die('Cliente inválido para esta conversa.');
+            header('Location: /mensagens?erro=cliente_invalido');
+            exit;
         }
 
         $stmt = $pdo->prepare("INSERT INTO mensagens_cliente (cliente_id, usuario_id, autor_tipo, mensagem, lida)
