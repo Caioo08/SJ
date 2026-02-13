@@ -66,6 +66,27 @@ h1{margin:0 0 8px;color:var(--acc)}.mut{color:var(--mut)}
     <?php endif; ?>
   </div>
 
+  <div class="card">
+    <h2 style="margin-top:0">Mensagens</h2>
+    <?php if (empty($mensagens)): ?>
+      <p class="mut">Sem mensagens ainda.</p>
+    <?php else: ?>
+      <?php foreach($mensagens as $m): ?>
+        <div style="padding:10px 0;border-bottom:1px solid var(--bd);">
+          <strong><?= $m['autor_tipo'] === 'cliente' ? 'Você' : 'Seu advogado' ?></strong>
+          <div class="mut" style="margin-top:4px;"><?= nl2br(htmlspecialchars($m['mensagem'])) ?></div>
+          <div class="mut" style="font-size:12px;"><?= date('d/m/Y H:i', strtotime($m['criado_em'])) ?></div>
+        </div>
+      <?php endforeach; ?>
+    <?php endif; ?>
+
+    <form method="POST" action="/cliente/mensagens/enviar" style="margin-top:12px;">
+      <?= Csrf::field() ?>
+      <textarea name="mensagem" rows="3" placeholder="Escreva uma mensagem para o escritório..." style="width:100%;padding:10px;border-radius:8px;background:#121212;color:var(--txt);border:1px solid var(--bd);" required></textarea>
+      <button class="btn" type="submit" style="margin-top:8px;border:none;">Enviar mensagem</button>
+    </form>
+  </div>
+
 </div>
 </body>
 </html>

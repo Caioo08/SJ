@@ -117,6 +117,30 @@ CREATE TABLE clientes (
     INDEX idx_clientes_email (email)
 ) ENGINE=InnoDB;
 
+
+-- ============================================
+-- TABELA: Mensagens Cliente x Escritório
+-- ============================================
+CREATE TABLE mensagens_cliente (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    cliente_id INT NOT NULL,
+    usuario_id INT NOT NULL,
+    autor_tipo ENUM('cliente','advogado') NOT NULL,
+    mensagem TEXT NOT NULL,
+    lida BOOLEAN DEFAULT FALSE,
+    criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_mensagens_cliente
+        FOREIGN KEY (cliente_id) REFERENCES clientes(id) ON DELETE CASCADE,
+
+    CONSTRAINT fk_mensagens_usuario
+        FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE,
+
+    INDEX idx_mensagens_cliente (cliente_id),
+    INDEX idx_mensagens_usuario (usuario_id),
+    INDEX idx_mensagens_criado_em (criado_em)
+) ENGINE=InnoDB;
+
 -- ============================================
 -- TABELA: Processos
 -- ============================================
@@ -245,6 +269,29 @@ CREATE TABLE prazos (
     INDEX idx_prazos_data_limite (data_limite),
     INDEX idx_prazos_concluido (concluido)
 ) ENGINE=InnoDB;
+
+-- ============================================
+-- TABELA: Histórico de Alterações de Prazos
+-- ============================================
+CREATE TABLE prazo_historico (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    prazo_id INT NOT NULL,
+    usuario_id INT NOT NULL,
+    alteracao VARCHAR(180) NOT NULL,
+    antes_json JSON NULL,
+    depois_json JSON NULL,
+    criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_prazo_historico_prazo
+        FOREIGN KEY (prazo_id) REFERENCES prazos(id) ON DELETE CASCADE,
+
+    CONSTRAINT fk_prazo_historico_usuario
+        FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE,
+
+    INDEX idx_prazo_historico_prazo (prazo_id),
+    INDEX idx_prazo_historico_criado_em (criado_em)
+) ENGINE=InnoDB;
+
 
 -- ============================================
 -- TABELA: Histórico de Alterações de Prazos

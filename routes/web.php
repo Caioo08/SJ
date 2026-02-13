@@ -237,6 +237,20 @@ elseif (preg_match('#^/compromissos/delete/(\d+)$#', $uri, $matches) && $method 
     CompromissosController::delete($id);
 }
 
+// ==================== MENSAGENS (APENAS ADVOGADOS) ====================
+
+elseif ($uri === '/mensagens' && $method === 'GET') {
+    AuthMiddleware::verificarAdvogado();
+    require_once '../app/controllers/MensagensController.php';
+    MensagensController::index();
+}
+
+elseif ($uri === '/mensagens/enviar' && $method === 'POST') {
+    AuthMiddleware::verificarAdvogado();
+    require_once '../app/controllers/MensagensController.php';
+    MensagensController::enviarAdvogado();
+}
+
 // ==================== DOCUMENTOS (APENAS ADVOGADOS) ====================
 
 elseif ($uri === '/documentos') {
@@ -367,6 +381,12 @@ elseif (preg_match('#^/cliente/processos/(\d+)$#', $uri, $matches) && $method ==
     $id = $matches[1];
     require_once '../app/controllers/ClientePortalController.php';
     ClientePortalController::showProcesso($id);
+}
+
+elseif ($uri === '/cliente/mensagens/enviar' && $method === 'POST') {
+    AuthMiddleware::verificarCliente();
+    require_once '../app/controllers/ClientePortalController.php';
+    ClientePortalController::enviarMensagem();
 }
 
 // ==================== LOGOUT ====================

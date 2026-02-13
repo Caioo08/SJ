@@ -1,6 +1,7 @@
 <?php
 
 require_once '../config/database.php';
+require_once '../app/helpers/Audit.php';
 
 class ClientePortalController
 {
@@ -37,7 +38,53 @@ class ClientePortalController
             $documentos = [];
         }
 
+        try {
+            $stmt = $pdo->prepare("SELECT * FROM mensagens_cliente WHERE cliente_id = ? ORDER BY criado_em DESC LIMIT 10");
+            $stmt->execute([$cliente_id]);
+            $mensagens = $stmt->fetchAll();
+        } catch (PDOException $e) {
+            $mensagens = [];
+        }
+
         require_once '../views/cliente_portal/index.php';
+    }
+
+    public static function enviarMensagem()
+    {
+        global $pdo;
+
+        if (!isset($_SESSION['cliente_id'])) {
+            header('Location: /login?acesso=cliente');
+            exit;
+        }
+
+        $cliente_id = (int) $_SESSION['cliente_id'];
+        $mensagem = trim($_POST['mensagem'] ?? '');
+
+        if ($mensagem === '') {
+            die('Mensagem não pode estar vazia.');
+        }
+
+        $stmt = $pdo->prepare("SELECT usuario_id FROM clientes WHERE id = ?");
+        $stmt->execute([$cliente_id]);
+        $cliente = $stmt->fetch();
+
+        if (!$cliente) {
+            die('Cliente inválido.');
+        }
+
+        $stmt = $pdo->prepare("INSERT INTO mensagens_cliente (cliente_id, usuario_id, autor_tipo, mensagem, lida)
+            VALUES (:cliente_id, :usuario_id, 'cliente', :mensagem, 0)");
+        $stmt->execute([
+            ':cliente_id' => $cliente_id,
+            ':usuario_id' => (int) $cliente['usuario_id'],
+            ':mensagem' => $mensagem,
+        ]);
+
+        Audit::registrar('Mensagem enviada pelo cliente', 'mensagens_cliente', (int) $pdo->lastInsertId(), 'Cliente ID: ' . $cliente_id);
+
+        header('Location: /cliente');
+        exit;
     }
 
     public static function showProcesso($id)
