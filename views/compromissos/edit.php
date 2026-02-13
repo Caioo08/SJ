@@ -184,6 +184,7 @@ a.btn:hover {
     <div class="card">
         <h1>✏️ Editar Compromisso</h1>
         <form action="/compromissos/update/<?= $compromisso['id'] ?>" method="POST">
+            <?= Csrf::field() ?>
             
             <!-- Informações Básicas -->
             <div class="form-section">
