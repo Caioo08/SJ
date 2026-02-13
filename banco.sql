@@ -240,7 +240,7 @@ CREATE TABLE documentos (
     INDEX idx_categoria (categoria),
     INDEX idx_documentos_cliente (cliente_id),
     INDEX idx_documentos_visivel_cliente (visivel_cliente)
-) ENGINE=InnoDB;
+
 
 
 
@@ -291,6 +291,7 @@ CREATE TABLE prazo_historico (
     INDEX idx_prazo_historico_prazo (prazo_id),
     INDEX idx_prazo_historico_criado_em (criado_em)
 ) ENGINE=InnoDB;
+
 
 
 -- ============================================
