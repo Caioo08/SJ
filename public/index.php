@@ -9,13 +9,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 require_once '../config/database.php';
 
+$metodo = $_SERVER['REQUEST_METHOD'] ?? 'GET';
+if ($metodo !== 'GET') {
+    require_once '../routes/web.php';
+    exit;
+}
+
 ob_start();
 require_once '../routes/web.php';
 $content = ob_get_clean();
 
 $mostrarAcessoMensagens = isset($_SESSION['perfil_id'], $_SESSION['usuario_id'])
     && (int) $_SESSION['perfil_id'] === 2;
-
 
 $uriAtual = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';
 $estaNaAreaMensagens = preg_match('#^/mensagens(?:/.*)?$#', $uriAtual) === 1;
