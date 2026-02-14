@@ -113,6 +113,7 @@
       </div>
 
       <form method="POST" action="/register" novalidate>
+            <?= Csrf::field() ?>
 
         <div>
           <label for="nome">Nome</label>

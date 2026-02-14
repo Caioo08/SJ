@@ -1,6 +1,7 @@
 <?php
 
 require_once '../config/database.php';
+require_once '../app/helpers/Audit.php';
 
 class ClientesController
 {
@@ -17,7 +18,7 @@ class ClientesController
         $usuario_id = $_SESSION['usuario_id'];
 
         $stmt = $pdo->prepare("
-            SELECT id, nome, cpf_cnpj, estado_civil, email, celular, cidade, uf, criado_em 
+            SELECT id, nome, cpf_cnpj, estado_civil, email, celular, cidade, uf, senha_hash, criado_em 
             FROM clientes 
             WHERE usuario_id = ? 
             ORDER BY nome ASC
@@ -103,13 +104,13 @@ class ClientesController
 
         $usuario_id = $_SESSION['usuario_id'];
 
-         // Recebe os dados do formulário
         $nome = trim($_POST['nome'] ?? '');
         $cpf_cnpj = trim($_POST['cpf_cnpj'] ?? '');
         $rg = trim($_POST['rg'] ?? '');
         $nacionalidade = trim($_POST['nacionalidade'] ?? '');
         $estado_civil = trim($_POST['estado_civil'] ?? '');
         $email = trim($_POST['email'] ?? '');
+        $senha_portal = $_POST['senha_portal'] ?? '';
         $telefone = trim($_POST['telefone'] ?? '');
         $celular = trim($_POST['celular'] ?? '');
         $cep = trim($_POST['cep'] ?? '');
@@ -121,18 +122,22 @@ class ClientesController
         $uf = trim($_POST['uf'] ?? '');
         $observacoes = trim($_POST['observacoes'] ?? '');
 
-        // Validação simples
         if (empty($nome)) {
             die("O nome do cliente é obrigatório.");
         }
 
-        // Inserção segura no banco
+        if (!empty($senha_portal) && empty($email)) {
+            die("Para criar senha de acesso do cliente, informe um email válido.");
+        }
+
+        $senha_hash = !empty($senha_portal) ? password_hash($senha_portal, PASSWORD_DEFAULT) : null;
+
         $stmt = $pdo->prepare("
             INSERT INTO clientes (
-                usuario_id, nome, cpf_cnpj, rg, nacionalidade, estado_civil, email, telefone, celular,
+                usuario_id, nome, cpf_cnpj, rg, nacionalidade, estado_civil, email, senha_hash, telefone, celular,
                 cep, endereco, numero, complemento, bairro, cidade, uf, observacoes
             ) VALUES (
-                :usuario_id, :nome, :cpf_cnpj, :rg, :nacionalidade, :estado_civil, :email, :telefone, :celular,
+                :usuario_id, :nome, :cpf_cnpj, :rg, :nacionalidade, :estado_civil, :email, :senha_hash, :telefone, :celular,
                 :cep, :endereco, :numero, :complemento, :bairro, :cidade, :uf, :observacoes
             )
         ");
@@ -146,6 +151,7 @@ class ClientesController
                 ':nacionalidade'=> $nacionalidade,
                 ':estado_civil' => $estado_civil ?: null,
                 ':email'        => $email,
+                ':senha_hash'   => $senha_hash,
                 ':telefone'     => $telefone,
                 ':celular'      => $celular,
                 ':cep'          => $cep,
@@ -158,9 +164,10 @@ class ClientesController
                 ':observacoes'  => $observacoes
             ]);
 
+            Audit::registrar('Cliente criado', 'clientes', (int) $pdo->lastInsertId(), 'Nome: ' . $nome);
+
             header('Location: /clientes');
             exit;
-
         } catch (PDOException $e) {
             die("Erro ao cadastrar cliente: " . $e->getMessage());
         }
@@ -191,7 +198,6 @@ class ClientesController
     }
 
     // Atualiza o cliente
-       // Atualiza o cliente
     public static function update($id)
     {
         global $pdo;
@@ -203,13 +209,13 @@ class ClientesController
 
         $usuario_id = $_SESSION['usuario_id'];
 
-        // Recebe os dados do formulário
         $nome = trim($_POST['nome'] ?? '');
         $cpf_cnpj = trim($_POST['cpf_cnpj'] ?? '');
         $rg = trim($_POST['rg'] ?? '');
         $nacionalidade = trim($_POST['nacionalidade'] ?? '');
         $estado_civil = trim($_POST['estado_civil'] ?? '');
         $email = trim($_POST['email'] ?? '');
+        $senha_portal = $_POST['senha_portal'] ?? '';
         $telefone = trim($_POST['telefone'] ?? '');
         $celular = trim($_POST['celular'] ?? '');
         $cep = trim($_POST['cep'] ?? '');
@@ -221,12 +227,19 @@ class ClientesController
         $uf = trim($_POST['uf'] ?? '');
         $observacoes = trim($_POST['observacoes'] ?? '');
 
-        // Validação simples
         if (empty($nome)) {
             die("O nome do cliente é obrigatório.");
         }
 
-        // Atualização segura no banco
+        if (!empty($senha_portal) && empty($email)) {
+            die("Para definir senha de acesso do cliente, informe um email válido.");
+        }
+
+        $camposSenha = '';
+        if (!empty($senha_portal)) {
+            $camposSenha = ', senha_hash = :senha_hash';
+        }
+
         $stmt = $pdo->prepare("
             UPDATE clientes SET
                 nome = :nome,
@@ -234,7 +247,7 @@ class ClientesController
                 rg = :rg,
                 nacionalidade = :nacionalidade,
                 estado_civil = :estado_civil,
-                email = :email,
+                email = :email{$camposSenha},
                 telefone = :telefone,
                 celular = :celular,
                 cep = :cep,
@@ -250,7 +263,7 @@ class ClientesController
         ");
 
         try {
-            $stmt->execute([
+            $params = [
                 ':nome'         => $nome,
                 ':cpf_cnpj'     => $cpf_cnpj,
                 ':rg'           => $rg,
@@ -269,11 +282,18 @@ class ClientesController
                 ':observacoes'  => $observacoes,
                 ':id'           => $id,
                 ':usuario_id'   => $usuario_id
-            ]);
+            ];
+
+            if (!empty($senha_portal)) {
+                $params[':senha_hash'] = password_hash($senha_portal, PASSWORD_DEFAULT);
+            }
+
+            $stmt->execute($params);
+
+            Audit::registrar('Cliente atualizado', 'clientes', (int) $id, 'Nome: ' . $nome);
 
             header('Location: /clientes/' . $id);
             exit;
-
         } catch (PDOException $e) {
             die("Erro ao atualizar cliente: " . $e->getMessage());
         }
@@ -335,15 +355,18 @@ class ClientesController
         }
 
         // Verificar se o cliente pertence ao usuário
-        $stmt = $pdo->prepare("SELECT id FROM clientes WHERE id = ? AND usuario_id = ?");
+        $stmt = $pdo->prepare("SELECT id, nome FROM clientes WHERE id = ? AND usuario_id = ?");
         $stmt->execute([$id, $usuario_id]);
-        if (!$stmt->fetch()) {
+        $cliente = $stmt->fetch();
+        if (!$cliente) {
             die("Cliente não encontrado ou você não tem permissão.");
         }
 
         // Deletar cliente (processos vinculados terão cliente_id definido como NULL devido ao ON DELETE SET NULL)
         $stmt = $pdo->prepare("DELETE FROM clientes WHERE id = ? AND usuario_id = ?");
         $stmt->execute([$id, $usuario_id]);
+
+        Audit::registrar('Cliente excluído', 'clientes', (int) $id, 'Nome: ' . ($cliente['nome'] ?? ''));
 
         header('Location: /clientes?deleted=1');
         exit;
