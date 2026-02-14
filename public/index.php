@@ -16,7 +16,11 @@ $content = ob_get_clean();
 $mostrarAcessoMensagens = isset($_SESSION['perfil_id'], $_SESSION['usuario_id'])
     && (int) $_SESSION['perfil_id'] === 2;
 
-if ($mostrarAcessoMensagens && stripos($content, '</body>') !== false) {
+
+$uriAtual = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';
+$estaNaAreaMensagens = preg_match('#^/mensagens(?:/.*)?$#', $uriAtual) === 1;
+
+if ($mostrarAcessoMensagens && !$estaNaAreaMensagens && stripos($content, '</body>') !== false) {
     $botaoMensagens = <<<HTML
 <style>
 .fab-mensagens {
