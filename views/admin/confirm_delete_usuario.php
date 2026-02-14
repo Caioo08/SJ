@@ -238,6 +238,7 @@ button, a.btn {
         </div>
 
         <form action="/admin/usuarios/delete/<?= $usuario['id'] ?>" method="POST">
+            <?= Csrf::field() ?>
             <div class="form-group">
                 <label for="senha">Digite sua senha de administrador para confirmar:</label>
                 <input type="password" id="senha" name="senha" placeholder="••••••••" required autofocus>
