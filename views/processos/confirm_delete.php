@@ -255,6 +255,7 @@ button, a.btn {
         </div>
 
         <form action="/processos/delete/<?= $processo['id'] ?>" method="POST">
+            <?= Csrf::field() ?>
             <div class="form-group">
                 <label for="senha">Digite sua senha para confirmar a exclusão:</label>
                 <input type="password" id="senha" name="senha" placeholder="••••••••" required autofocus>
