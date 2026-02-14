@@ -270,6 +270,8 @@ CREATE TABLE prazos (
     INDEX idx_prazos_concluido (concluido)
 ) ENGINE=InnoDB;
 
+
+
 -- ============================================
 -- TABELA: Histórico de Alterações de Prazos
 -- ============================================
@@ -290,6 +292,95 @@ CREATE TABLE prazo_historico (
 
     INDEX idx_prazo_historico_prazo (prazo_id),
     INDEX idx_prazo_historico_criado_em (criado_em)
+) ENGINE=InnoDB;
+
+
+-- ============================================
+-- TABELA: Histórico de Alterações de Prazos
+-- ============================================
+CREATE TABLE prazo_historico (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    prazo_id INT NOT NULL,
+    usuario_id INT NOT NULL,
+    alteracao VARCHAR(180) NOT NULL,
+    antes_json JSON NULL,
+    depois_json JSON NULL,
+    criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_prazo_historico_prazo
+        FOREIGN KEY (prazo_id) REFERENCES prazos(id) ON DELETE CASCADE,
+
+    CONSTRAINT fk_prazo_historico_usuario
+        FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE,
+
+    INDEX idx_prazo_historico_prazo (prazo_id),
+    INDEX idx_prazo_historico_criado_em (criado_em)
+) ENGINE=InnoDB;
+
+
+-- ============================================
+-- TABELA: Checklist por Processo (Fase C1)
+-- ============================================
+CREATE TABLE processo_checklist_itens (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    processo_id INT NOT NULL,
+    usuario_id INT NOT NULL,
+    titulo VARCHAR(180) NOT NULL,
+    concluido BOOLEAN DEFAULT FALSE,
+    criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    atualizado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_checklist_processo
+        FOREIGN KEY (processo_id) REFERENCES processos(id) ON DELETE CASCADE,
+
+    CONSTRAINT fk_checklist_usuario
+        FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE,
+
+    INDEX idx_checklist_processo (processo_id),
+    INDEX idx_checklist_usuario (usuario_id),
+    INDEX idx_checklist_concluido (concluido)
+) ENGINE=InnoDB;
+
+-- ============================================
+-- TABELAS: Petições e Versionamento (Fase C2)
+-- ============================================
+CREATE TABLE peticoes (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    processo_id INT NOT NULL,
+    usuario_id INT NOT NULL,
+    titulo VARCHAR(180) NOT NULL,
+    criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    atualizado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_peticoes_processo
+        FOREIGN KEY (processo_id) REFERENCES processos(id) ON DELETE CASCADE,
+
+    CONSTRAINT fk_peticoes_usuario
+        FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE,
+
+    INDEX idx_peticoes_processo (processo_id),
+    INDEX idx_peticoes_usuario (usuario_id),
+    INDEX idx_peticoes_titulo (titulo)
+) ENGINE=InnoDB;
+
+CREATE TABLE peticao_versoes (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    peticao_id INT NOT NULL,
+    usuario_id INT NOT NULL,
+    versao INT NOT NULL,
+    observacao VARCHAR(255),
+    conteudo MEDIUMTEXT NOT NULL,
+    criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_peticao_versao_peticao
+        FOREIGN KEY (peticao_id) REFERENCES peticoes(id) ON DELETE CASCADE,
+
+    CONSTRAINT fk_peticao_versao_usuario
+        FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE,
+
+    UNIQUE KEY uq_peticao_versao (peticao_id, versao),
+    INDEX idx_peticao_versao_peticao (peticao_id),
+    INDEX idx_peticao_versao_usuario (usuario_id)
 ) ENGINE=InnoDB;
 
 

@@ -240,6 +240,14 @@ h1 {
     color: var(--muted);
 }
 
+
+.check-item {display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px;border:1px solid var(--border);border-radius:8px;background:var(--bg-secondary);margin-bottom:8px;}
+.check-item.done {opacity:.75}
+.check-title.done {text-decoration:line-through;color:var(--muted)}
+.inline-form{margin:0}
+.field-input{width:100%;padding:10px 12px;border-radius:8px;border:1px solid var(--border);background:var(--bg-secondary);color:var(--primary);margin-bottom:8px}
+.small-text{font-size:12px;color:var(--muted)}
+
 @media (max-width: 968px) {
     .content-grid {
         grid-template-columns: 1fr;
@@ -411,6 +419,60 @@ h1 {
                     </p>
                     <?php endif; ?>
                 </div>
+            </div>
+
+
+            <!-- Fase C: Checklist do Processo -->
+            <div class="card" style="margin-top: 24px;">
+                <h2>✅ Checklist</h2>
+                <?php if (empty($checklistItens)): ?>
+                    <p class="small-text">Nenhum item de checklist ainda.</p>
+                <?php else: ?>
+                    <?php foreach($checklistItens as $item): ?>
+                        <div class="check-item <?= (int)$item['concluido'] === 1 ? 'done' : '' ?>">
+                            <div>
+                                <div class="check-title <?= (int)$item['concluido'] === 1 ? 'done' : '' ?>"><?= htmlspecialchars($item['titulo']) ?></div>
+                                <div class="small-text">Criado em <?= date('d/m/Y H:i', strtotime($item['criado_em'])) ?></div>
+                            </div>
+                            <form method="POST" action="/processos/checklist/<?= (int)$item['id'] ?>/toggle" class="inline-form">
+                                <?= Csrf::field() ?>
+                                <button type="submit" class="btn btn-secondary" style="padding:8px 10px;"><?= (int)$item['concluido'] === 1 ? 'Reabrir' : 'Concluir' ?></button>
+                            </form>
+                        </div>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+                <form method="POST" action="/processos/<?= (int)$processo['id'] ?>/checklist/adicionar">
+                    <?= Csrf::field() ?>
+                    <input class="field-input" type="text" name="titulo" placeholder="Novo item de checklist" required>
+                    <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;">Adicionar item</button>
+                </form>
+            </div>
+
+            <!-- Fase C: Petições versionadas -->
+            <div class="card" style="margin-top: 24px;">
+                <h2>🧾 Petições (versionamento)</h2>
+                <?php if (empty($peticoes)): ?>
+                    <p class="small-text">Sem petições registradas.</p>
+                <?php else: ?>
+                    <div style="display:grid;gap:10px;margin-bottom:12px;">
+                        <?php foreach($peticoes as $pt): ?>
+                            <div class="check-item" style="align-items:flex-start;">
+                                <div>
+                                    <strong><?= htmlspecialchars($pt['titulo']) ?></strong>
+                                    <div class="small-text">Versão <?= (int)($pt['versao'] ?? 1) ?> • <?= !empty($pt['criado_em']) ? date('d/m/Y H:i', strtotime($pt['criado_em'])) : '-' ?></div>
+                                    <?php if(!empty($pt['observacao'])): ?><div class="small-text">Obs: <?= htmlspecialchars($pt['observacao']) ?></div><?php endif; ?>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                <?php endif; ?>
+                <form method="POST" action="/processos/<?= (int)$processo['id'] ?>/peticoes/versao">
+                    <?= Csrf::field() ?>
+                    <input class="field-input" type="text" name="titulo" placeholder="Título da petição" required>
+                    <input class="field-input" type="text" name="observacao" placeholder="Observação da versão (opcional)">
+                    <textarea class="field-input" name="conteudo" rows="4" placeholder="Conteúdo/rascunho da versão" required></textarea>
+                    <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;">Salvar nova versão</button>
+                </form>
             </div>
 
             <!-- Ações Rápidas -->

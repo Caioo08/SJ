@@ -3,6 +3,7 @@
 require_once '../app/controllers/AuthController.php';
 require_once '../app/helpers/AuthMiddleware.php';
 require_once '../app/helpers/Audit.php';
+require_once '../app/controllers/FaseCController.php';
 
 $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $method = $_SERVER['REQUEST_METHOD'];
@@ -131,6 +132,25 @@ elseif (preg_match('#^/processos/(\d+)$#', $uri, $matches) && $method === 'GET')
     $id = $matches[1];
     require_once '../app/controllers/ProcessosController.php';
     ProcessosController::show($id);
+}
+
+
+elseif (preg_match('#^/processos/(\d+)/checklist/adicionar$#', $uri, $matches) && $method === 'POST') {
+    AuthMiddleware::verificarAdvogado();
+    $id = $matches[1];
+    FaseCController::adicionarChecklistItem($id);
+}
+
+elseif (preg_match('#^/processos/checklist/(\d+)/toggle$#', $uri, $matches) && $method === 'POST') {
+    AuthMiddleware::verificarAdvogado();
+    $itemId = $matches[1];
+    FaseCController::toggleChecklistItem($itemId);
+}
+
+elseif (preg_match('#^/processos/(\d+)/peticoes/versao$#', $uri, $matches) && $method === 'POST') {
+    AuthMiddleware::verificarAdvogado();
+    $id = $matches[1];
+    FaseCController::adicionarPeticaoVersao($id);
 }
 
 // ==================== CLIENTES (APENAS ADVOGADOS) ====================

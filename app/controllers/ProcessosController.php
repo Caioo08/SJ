@@ -288,6 +288,31 @@ class ProcessosController
             $eventos = [];
         }
 
+        try {
+            $stmt = $pdo->prepare("SELECT id, titulo, concluido, criado_em, atualizado_em
+                FROM processo_checklist_itens
+                WHERE processo_id = ? AND usuario_id = ?
+                ORDER BY concluido ASC, criado_em ASC");
+            $stmt->execute([$id, $usuario_id]);
+            $checklistItens = $stmt->fetchAll();
+        } catch (PDOException $e) {
+            $checklistItens = [];
+        }
+
+        try {
+            $stmt = $pdo->prepare("SELECT p.id AS peticao_id, p.titulo, v.versao, v.observacao, v.conteudo, v.criado_em
+                FROM peticoes p
+                LEFT JOIN peticao_versoes v ON v.id = (
+                    SELECT pv.id FROM peticao_versoes pv WHERE pv.peticao_id = p.id ORDER BY pv.versao DESC LIMIT 1
+                )
+                WHERE p.processo_id = ? AND p.usuario_id = ?
+                ORDER BY p.criado_em DESC");
+            $stmt->execute([$id, $usuario_id]);
+            $peticoes = $stmt->fetchAll();
+        } catch (PDOException $e) {
+            $peticoes = [];
+        }
+
         require_once '../views/processos/show.php';
     }
 
