@@ -313,6 +313,22 @@ class ProcessosController
             $peticoes = [];
         }
 
+
+        $checklistResumo = [
+            'total' => count($checklistItens),
+            'concluidos' => 0,
+            'percentual' => 0,
+        ];
+
+        if ($checklistResumo['total'] > 0) {
+            foreach ($checklistItens as $item) {
+                if ((int) ($item['concluido'] ?? 0) === 1) {
+                    $checklistResumo['concluidos']++;
+                }
+            }
+            $checklistResumo['percentual'] = (int) round(($checklistResumo['concluidos'] / $checklistResumo['total']) * 100);
+        }
+
         require_once '../views/processos/show.php';
     }
 

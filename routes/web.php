@@ -153,6 +153,25 @@ elseif (preg_match('#^/processos/(\d+)/peticoes/versao$#', $uri, $matches) && $m
     FaseCController::adicionarPeticaoVersao($id);
 }
 
+elseif (preg_match('#^/processos/(\d+)/checklist/padrao$#', $uri, $matches) && $method === 'POST') {
+    AuthMiddleware::verificarAdvogado();
+    $id = $matches[1];
+    FaseCController::criarChecklistPadrao($id);
+}
+
+elseif (preg_match('#^/processos/(\d+)/peticoes/(\d+)$#', $uri, $matches) && $method === 'GET') {
+    AuthMiddleware::verificarAdvogado();
+    $processoId = $matches[1];
+    $peticaoId = $matches[2];
+    FaseCController::verPeticao($processoId, $peticaoId);
+}
+
+elseif (preg_match('#^/peticoes/versoes/(\d+)/derivar$#', $uri, $matches) && $method === 'POST') {
+    AuthMiddleware::verificarAdvogado();
+    $versaoId = $matches[1];
+    FaseCController::derivarVersao($versaoId);
+}
+
 // ==================== CLIENTES (APENAS ADVOGADOS) ====================
 
 elseif ($uri === '/clientes') {

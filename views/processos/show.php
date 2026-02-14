@@ -247,6 +247,9 @@ h1 {
 .inline-form{margin:0}
 .field-input{width:100%;padding:10px 12px;border-radius:8px;border:1px solid var(--border);background:var(--bg-secondary);color:var(--primary);margin-bottom:8px}
 .small-text{font-size:12px;color:var(--muted)}
+.progress-wrap{background:#121212;border:1px solid var(--border);border-radius:10px;padding:8px;margin-bottom:10px}
+.progress-bar{height:10px;border-radius:999px;background:rgba(255,255,255,.08);overflow:hidden}
+.progress-fill{height:100%;background:linear-gradient(90deg,#d4af37,#f1c65b)}
 
 @media (max-width: 968px) {
     .content-grid {
@@ -425,8 +428,16 @@ h1 {
             <!-- Fase C: Checklist do Processo -->
             <div class="card" style="margin-top: 24px;">
                 <h2>✅ Checklist</h2>
+                <div class="progress-wrap">
+                    <div class="small-text">Progresso: <?= (int)($checklistResumo['concluidos'] ?? 0) ?>/<?= (int)($checklistResumo['total'] ?? 0) ?> (<?= (int)($checklistResumo['percentual'] ?? 0) ?>%)</div>
+                    <div class="progress-bar"><div class="progress-fill" style="width: <?= (int)($checklistResumo['percentual'] ?? 0) ?>%;"></div></div>
+                </div>
                 <?php if (empty($checklistItens)): ?>
                     <p class="small-text">Nenhum item de checklist ainda.</p>
+                    <form method="POST" action="/processos/<?= (int)$processo['id'] ?>/checklist/padrao" style="margin-bottom:10px;">
+                        <?= Csrf::field() ?>
+                        <button type="submit" class="btn btn-secondary" style="width:100%;justify-content:center;">Aplicar checklist padrão</button>
+                    </form>
                 <?php else: ?>
                     <?php foreach($checklistItens as $item): ?>
                         <div class="check-item <?= (int)$item['concluido'] === 1 ? 'done' : '' ?>">
@@ -458,7 +469,7 @@ h1 {
                         <?php foreach($peticoes as $pt): ?>
                             <div class="check-item" style="align-items:flex-start;">
                                 <div>
-                                    <strong><?= htmlspecialchars($pt['titulo']) ?></strong>
+                                    <strong><?= htmlspecialchars($pt['titulo']) ?></strong> <a href="/processos/<?= (int)$processo['id'] ?>/peticoes/<?= (int)$pt['peticao_id'] ?>" class="small-text" style="margin-left:8px;">ver histórico</a>
                                     <div class="small-text">Versão <?= (int)($pt['versao'] ?? 1) ?> • <?= !empty($pt['criado_em']) ? date('d/m/Y H:i', strtotime($pt['criado_em'])) : '-' ?></div>
                                     <?php if(!empty($pt['observacao'])): ?><div class="small-text">Obs: <?= htmlspecialchars($pt['observacao']) ?></div><?php endif; ?>
                                 </div>
