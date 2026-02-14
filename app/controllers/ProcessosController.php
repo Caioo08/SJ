@@ -1,6 +1,7 @@
 <?php
 
 require_once '../config/database.php';
+require_once '../app/helpers/Audit.php';
 
 class ProcessosController
 {
@@ -120,6 +121,10 @@ class ProcessosController
                 ':status'           => $status
             ]);
 
+            $processoId = (int) $pdo->lastInsertId();
+            self::registrarEvento($processoId, $usuario_id, 'Processo criado', 'Processo cadastrado no sistema.', 'criacao');
+            Audit::registrar('Processo criado', 'processos', $processoId, 'Cliente: ' . $cliente_nome);
+
             header('Location: /processos');
             exit;
 
@@ -227,6 +232,9 @@ class ProcessosController
                 ':usuario_id'       => $usuario_id
             ]);
 
+            self::registrarEvento($id, $usuario_id, 'Processo atualizado', 'Dados do processo foram atualizados.', 'atualizacao');
+            Audit::registrar('Processo atualizado', 'processos', (int) $id, 'Cliente: ' . $cliente_nome);
+
             header('Location: /processos');
             exit;
 
@@ -270,6 +278,39 @@ class ProcessosController
 
         if (!$processo) {
             die("Processo não encontrado ou você não tem permissão.");
+        }
+
+        try {
+            $stmt = $pdo->prepare("SELECT titulo, descricao, tipo, criado_em FROM processo_eventos WHERE processo_id = ? ORDER BY criado_em DESC");
+            $stmt->execute([$id]);
+            $eventos = $stmt->fetchAll();
+        } catch (PDOException $e) {
+            $eventos = [];
+        }
+
+        try {
+            $stmt = $pdo->prepare("SELECT id, titulo, concluido, criado_em, atualizado_em
+                FROM processo_checklist_itens
+                WHERE processo_id = ? AND usuario_id = ?
+                ORDER BY concluido ASC, criado_em ASC");
+            $stmt->execute([$id, $usuario_id]);
+            $checklistItens = $stmt->fetchAll();
+        } catch (PDOException $e) {
+            $checklistItens = [];
+        }
+
+        try {
+            $stmt = $pdo->prepare("SELECT p.id AS peticao_id, p.titulo, v.versao, v.observacao, v.conteudo, v.criado_em
+                FROM peticoes p
+                LEFT JOIN peticao_versoes v ON v.id = (
+                    SELECT pv.id FROM peticao_versoes pv WHERE pv.peticao_id = p.id ORDER BY pv.versao DESC LIMIT 1
+                )
+                WHERE p.processo_id = ? AND p.usuario_id = ?
+                ORDER BY p.criado_em DESC");
+            $stmt->execute([$id, $usuario_id]);
+            $peticoes = $stmt->fetchAll();
+        } catch (PDOException $e) {
+            $peticoes = [];
         }
 
         require_once '../views/processos/show.php';
@@ -337,6 +378,9 @@ class ProcessosController
             die("Processo não encontrado ou você não tem permissão.");
         }
 
+        self::registrarEvento($id, $usuario_id, 'Processo excluído', 'Processo removido pelo advogado.', 'sistema');
+        Audit::registrar('Processo excluído', 'processos', (int) $id, null);
+
         // Deletar processo
         $stmt = $pdo->prepare("DELETE FROM processos WHERE id = ? AND usuario_id = ?");
         $stmt->execute([$id, $usuario_id]);
@@ -344,4 +388,26 @@ class ProcessosController
         header('Location: /processos?deleted=1');
         exit;
     }
+    private static function registrarEvento(int $processoId, int $usuarioId, string $titulo, string $descricao = '', string $tipo = 'sistema'): void
+    {
+        global $pdo;
+
+        try {
+            $stmt = $pdo->prepare("
+                INSERT INTO processo_eventos (processo_id, usuario_id, titulo, descricao, tipo)
+                VALUES (:processo_id, :usuario_id, :titulo, :descricao, :tipo)
+            ");
+
+            $stmt->execute([
+                ':processo_id' => $processoId,
+                ':usuario_id' => $usuarioId,
+                ':titulo' => $titulo,
+                ':descricao' => $descricao,
+                ':tipo' => $tipo
+            ]);
+        } catch (PDOException $e) {
+            // Não interrompe o fluxo principal caso a tabela de eventos ainda não exista.
+        }
+    }
+
 }
