@@ -4,6 +4,20 @@ session_start();
 require_once '../app/helpers/Csrf.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (!Csrf::verifyRequest()) {
+        $uriPost = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';
+
+        if (preg_match('#^/mensagens/enviar/?$#', $uriPost)) {
+            header('Location: /mensagens?erro=csrf');
+            exit;
+        }
+
+        if (preg_match('#^/cliente/mensagens/enviar/?$#', $uriPost)) {
+            header('Location: /cliente?erro=csrf');
+            exit;
+        }
+    }
+
     Csrf::abortIfInvalid();
 }
 

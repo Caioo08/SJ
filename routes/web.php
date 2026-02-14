@@ -245,7 +245,7 @@ elseif ($uri === '/mensagens' && $method === 'GET') {
     MensagensController::index();
 }
 
-elseif ($uri === '/mensagens/enviar' && $method === 'POST') {
+elseif (preg_match('#^/mensagens/enviar/?$#', $uri) && $method === 'POST') {
     AuthMiddleware::verificarAdvogado();
     require_once '../app/controllers/MensagensController.php';
     MensagensController::enviarAdvogado();
