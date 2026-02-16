@@ -434,28 +434,64 @@ class FaseCController
         $arquivoOriginal = null;
         $arquivoCaminho = null;
 
-        if (!empty($_FILES['arquivo_peticao']['name']) && ($_FILES['arquivo_peticao']['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_OK) {
-            $nomeTmp = $_FILES['arquivo_peticao']['tmp_name'];
-            $nomeOriginal = basename((string) $_FILES['arquivo_peticao']['name']);
-            $ext = strtolower(pathinfo($nomeOriginal, PATHINFO_EXTENSION));
-            $permitidas = ['pdf', 'doc', 'docx', 'txt'];
+        $arquivoErro = (int) ($_FILES['arquivo_peticao']['error'] ?? UPLOAD_ERR_NO_FILE);
+        if ($arquivoErro !== UPLOAD_ERR_NO_FILE) {
+            if ($arquivoErro !== UPLOAD_ERR_OK) {
+                header('Location: /processos/' . $processoId . '?erro=arquivo_upload');
+                exit;
+            }
 
-            if (!in_array($ext, $permitidas, true)) {
+            $nomeTmp = (string) ($_FILES['arquivo_peticao']['tmp_name'] ?? '');
+            $nomeOriginal = basename((string) ($_FILES['arquivo_peticao']['name'] ?? ''));
+            $ext = strtolower(pathinfo($nomeOriginal, PATHINFO_EXTENSION));
+            $tamanho = (int) ($_FILES['arquivo_peticao']['size'] ?? 0);
+
+            $maxBytes = 10 * 1024 * 1024; // 10MB
+            if ($nomeOriginal === '' || $tamanho <= 0 || $tamanho > $maxBytes || !is_uploaded_file($nomeTmp)) {
+                header('Location: /processos/' . $processoId . '?erro=arquivo_invalido');
+                exit;
+            }
+
+            $permitidas = [
+                'pdf' => ['application/pdf'],
+                'doc' => ['application/msword', 'application/octet-stream'],
+                'docx' => ['application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/zip', 'application/octet-stream'],
+                'txt' => ['text/plain', 'application/octet-stream'],
+            ];
+
+            if (!isset($permitidas[$ext])) {
+                header('Location: /processos/' . $processoId . '?erro=arquivo_invalido');
+                exit;
+            }
+
+            $mime = null;
+            if (function_exists('finfo_open')) {
+                $finfo = finfo_open(FILEINFO_MIME_TYPE);
+                if ($finfo) {
+                    $mime = finfo_file($finfo, $nomeTmp) ?: null;
+                    finfo_close($finfo);
+                }
+            }
+            if ($mime !== null && !in_array($mime, $permitidas[$ext], true)) {
                 header('Location: /processos/' . $processoId . '?erro=arquivo_invalido');
                 exit;
             }
 
             $dir = __DIR__ . '/../../public/uploads/peticoes';
-            if (!is_dir($dir)) {
-                @mkdir($dir, 0775, true);
+            if (!is_dir($dir) && !@mkdir($dir, 0775, true)) {
+                header('Location: /processos/' . $processoId . '?erro=arquivo_upload');
+                exit;
             }
 
             $arquivoSeguro = uniqid('peticao_', true) . '.' . $ext;
             $destino = $dir . '/' . $arquivoSeguro;
-            if (@move_uploaded_file($nomeTmp, $destino)) {
-                $arquivoOriginal = $nomeOriginal;
-                $arquivoCaminho = '/uploads/peticoes/' . $arquivoSeguro;
+            if (!@move_uploaded_file($nomeTmp, $destino)) {
+                header('Location: /processos/' . $processoId . '?erro=arquivo_upload');
+                exit;
             }
+
+            $arquivoOriginal = $nomeOriginal;
+            $arquivoCaminho = '/uploads/peticoes/' . $arquivoSeguro;
         }
 
         if ($titulo === '' || ($conteudo === '' && $arquivoCaminho === null)) {
@@ -577,10 +613,14 @@ class FaseCController
         }
 
         $fileName = $versao['arquivo_original'] ?: $basename;
-        $mime = function_exists('mime_content_type') ? mime_content_type($filePath) : 'application/octet-stream';
-        if (!$mime) {
-            $mime = 'application/octet-stream';
-        }
+        $ext = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
+        $mimePorExtensao = [
+            'pdf' => 'application/pdf',
+            'doc' => 'application/msword',
+            'docx' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            'txt' => 'text/plain',
+        ];
+        $mime = $mimePorExtensao[$ext] ?? 'application/octet-stream';
 
         header('Content-Type: ' . $mime);
         header('Content-Length: ' . filesize($filePath));
