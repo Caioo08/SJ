@@ -445,10 +445,16 @@ h1 {
                                 <div class="check-title <?= (int)$item['concluido'] === 1 ? 'done' : '' ?>"><?= htmlspecialchars($item['titulo']) ?></div>
                                 <div class="small-text">Criado em <?= date('d/m/Y H:i', strtotime($item['criado_em'])) ?></div>
                             </div>
-                            <form method="POST" action="/processos/checklist/<?= (int)$item['id'] ?>/toggle" class="inline-form">
-                                <?= Csrf::field() ?>
-                                <button type="submit" class="btn btn-secondary" style="padding:8px 10px;"><?= (int)$item['concluido'] === 1 ? 'Reabrir' : 'Concluir' ?></button>
-                            </form>
+                            <div style="display:flex;gap:6px;">
+                                <form method="POST" action="/processos/checklist/<?= (int)$item['id'] ?>/toggle" class="inline-form">
+                                    <?= Csrf::field() ?>
+                                    <button type="submit" class="btn btn-secondary" style="padding:8px 10px;"><?= (int)$item['concluido'] === 1 ? 'Reabrir' : 'Concluir' ?></button>
+                                </form>
+                                <form method="POST" action="/processos/checklist/<?= (int)$item['id'] ?>/remover" class="inline-form" onsubmit="return confirm('Remover este item do checklist?');">
+                                    <?= Csrf::field() ?>
+                                    <button type="submit" class="btn btn-danger" style="padding:8px 10px;">Remover</button>
+                                </form>
+                            </div>
                         </div>
                     <?php endforeach; ?>
                 <?php endif; ?>

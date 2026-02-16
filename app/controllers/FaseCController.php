@@ -203,6 +203,36 @@ class FaseCController
         exit;
     }
 
+    public static function removerChecklistItem($itemId)
+    {
+        global $pdo;
+
+        if (!isset($_SESSION['usuario_id'])) {
+            header('Location: /login');
+            exit;
+        }
+
+        $usuarioId = (int) $_SESSION['usuario_id'];
+        $itemId = (int) $itemId;
+
+        $stmt = $pdo->prepare("SELECT id, processo_id, titulo FROM processo_checklist_itens WHERE id = ? AND usuario_id = ?");
+        $stmt->execute([$itemId, $usuarioId]);
+        $item = $stmt->fetch();
+
+        if (!$item) {
+            header('Location: /processos?erro=checklist_item_invalido');
+            exit;
+        }
+
+        $stmt = $pdo->prepare("DELETE FROM processo_checklist_itens WHERE id = ? AND usuario_id = ?");
+        $stmt->execute([$itemId, $usuarioId]);
+
+        Audit::registrar('Checklist item removido', 'processo_checklist_itens', $itemId, 'Título: ' . ($item['titulo'] ?? ''));
+
+        header('Location: /processos/' . (int) $item['processo_id']);
+        exit;
+    }
+
     public static function toggleChecklistItem($itemId)
     {
         global $pdo;
@@ -358,6 +388,54 @@ class FaseCController
         $versoes = $stmt->fetchAll();
 
         require_once '../views/peticoes/show.php';
+    }
+
+    public static function downloadArquivoVersao($versaoId)
+    {
+        global $pdo;
+
+        if (!isset($_SESSION['usuario_id'])) {
+            header('Location: /login');
+            exit;
+        }
+
+        $usuarioId = (int) $_SESSION['usuario_id'];
+        $versaoId = (int) $versaoId;
+
+        $stmt = $pdo->prepare("SELECT pv.id, pv.arquivo_original, pv.arquivo_caminho, p.usuario_id
+            FROM peticao_versoes pv
+            INNER JOIN peticoes p ON p.id = pv.peticao_id
+            WHERE pv.id = ?");
+        $stmt->execute([$versaoId]);
+        $versao = $stmt->fetch();
+
+        if (!$versao || (int) $versao['usuario_id'] !== $usuarioId || empty($versao['arquivo_caminho'])) {
+            http_response_code(404);
+            echo 'Arquivo não encontrado.';
+            exit;
+        }
+
+        $base = realpath(__DIR__ . '/../../public/uploads/peticoes');
+        $basename = basename((string) $versao['arquivo_caminho']);
+        $filePath = $base ? ($base . DIRECTORY_SEPARATOR . $basename) : '';
+
+        if ($filePath === '' || !is_file($filePath)) {
+            http_response_code(404);
+            echo 'Arquivo não encontrado.';
+            exit;
+        }
+
+        $fileName = $versao['arquivo_original'] ?: $basename;
+        $mime = function_exists('mime_content_type') ? mime_content_type($filePath) : 'application/octet-stream';
+        if (!$mime) {
+            $mime = 'application/octet-stream';
+        }
+
+        header('Content-Type: ' . $mime);
+        header('Content-Length: ' . filesize($filePath));
+        header('Content-Disposition: attachment; filename="' . str_replace('"', '', $fileName) . '"');
+        readfile($filePath);
+        exit;
     }
 
     public static function derivarVersao($versaoId)

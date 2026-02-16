@@ -147,6 +147,13 @@ elseif (preg_match('#^/processos/checklist/(\d+)/toggle$#', $uri, $matches) && $
     FaseCController::toggleChecklistItem($itemId);
 }
 
+
+elseif (preg_match('#^/processos/checklist/(\d+)/remover$#', $uri, $matches) && $method === 'POST') {
+    AuthMiddleware::verificarAdvogado();
+    $itemId = $matches[1];
+    FaseCController::removerChecklistItem($itemId);
+}
+
 elseif (preg_match('#^/processos/(\d+)/peticoes/versao$#', $uri, $matches) && $method === 'POST') {
     AuthMiddleware::verificarAdvogado();
     $id = $matches[1];
@@ -196,6 +203,13 @@ elseif (preg_match('#^/peticoes/versoes/(\d+)/derivar$#', $uri, $matches) && $me
     AuthMiddleware::verificarAdvogado();
     $versaoId = $matches[1];
     FaseCController::derivarVersao($versaoId);
+}
+
+
+elseif (preg_match('#^/peticoes/versoes/(\d+)/download$#', $uri, $matches) && $method === 'GET') {
+    AuthMiddleware::verificarAdvogado();
+    $versaoId = $matches[1];
+    FaseCController::downloadArquivoVersao($versaoId);
 }
 
 // ==================== CLIENTES (APENAS ADVOGADOS) ====================
