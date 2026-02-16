@@ -182,7 +182,8 @@ class FaseCController
         $tipoAcao = trim($_POST['tipo_acao'] ?? 'geral');
         $itensBrutos = trim($_POST['itens'] ?? '');
         $itens = array_values(array_filter(array_map('trim', preg_split('/
-||
+|
+|
 /', $itensBrutos ?: ''))));
 
         if ($nome === '' || empty($itens)) {
