@@ -33,9 +33,10 @@ pre{white-space:pre-wrap;background:#121212;border:1px solid var(--bd);padding:1
     <?php foreach($versoes as $v): ?>
       <div class="card">
         <strong>Versão <?= (int)$v['versao'] ?></strong>
-        <div class="meta">Criada em <?= date('d/m/Y H:i', strtotime($v['criado_em'])) ?></div>
+        <div class="meta">Criada em <?= date('d/m/Y H:i', strtotime($v['criado_em'])) ?> • Autor: <?= htmlspecialchars($v['autor_nome'] ?? 'Usuário') ?></div>
         <?php if(!empty($v['observacao'])): ?><div class="meta">Obs: <?= htmlspecialchars($v['observacao']) ?></div><?php endif; ?>
-        <pre><?= htmlspecialchars($v['conteudo']) ?></pre>
+        <?php if(!empty($v['arquivo_caminho'])): ?><div class="meta">Arquivo: <a href="<?= htmlspecialchars($v['arquivo_caminho']) ?>" target="_blank" style="color:#d4af37"><?= htmlspecialchars($v['arquivo_original'] ?: 'abrir') ?></a></div><?php endif; ?>
+        <?php if(!empty($v['conteudo'])): ?><pre><?= htmlspecialchars($v['conteudo']) ?></pre><?php else: ?><div class="meta">Sem conteúdo textual nesta versão.</div><?php endif; ?>
         <form class="inline" method="POST" action="/peticoes/versoes/<?= (int)$v['id'] ?>/derivar">
           <?= Csrf::field() ?>
           <button class="btn" type="submit">Derivar nova versão</button>

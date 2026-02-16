@@ -329,6 +329,14 @@ class ProcessosController
             $checklistResumo['percentual'] = (int) round(($checklistResumo['concluidos'] / $checklistResumo['total']) * 100);
         }
 
+        try {
+            $stmt = $pdo->prepare("SELECT id, nome, tipo_acao, ativo FROM checklist_modelos WHERE usuario_id = ? ORDER BY ativo DESC, nome ASC");
+            $stmt->execute([$usuario_id]);
+            $checklistModelos = $stmt->fetchAll();
+        } catch (PDOException $e) {
+            $checklistModelos = [];
+        }
+
         require_once '../views/processos/show.php';
     }
 

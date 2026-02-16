@@ -87,6 +87,122 @@ class FaseCController
         exit;
     }
 
+    public static function salvarModeloChecklist()
+    {
+        global $pdo;
+
+        if (!isset($_SESSION['usuario_id'])) {
+            header('Location: /login');
+            exit;
+        }
+
+        $usuarioId = (int) $_SESSION['usuario_id'];
+        $nome = trim($_POST['nome'] ?? '');
+        $tipoAcao = trim($_POST['tipo_acao'] ?? 'geral');
+        $itensBrutos = trim($_POST['itens'] ?? '');
+
+        $itens = array_values(array_filter(array_map('trim', preg_split('/\r\n|\r|\n/', $itensBrutos ?: ''))));
+
+        if ($nome === '' || empty($itens)) {
+            header('Location: /processos?erro=modelo_invalido');
+            exit;
+        }
+
+        $stmt = $pdo->prepare("INSERT INTO checklist_modelos (usuario_id, nome, tipo_acao, itens_json, ativo)
+            VALUES (?, ?, ?, ?, 1)");
+        $stmt->execute([$usuarioId, $nome, $tipoAcao, json_encode($itens, JSON_UNESCAPED_UNICODE)]);
+
+        Audit::registrar('Modelo checklist criado', 'checklist_modelos', (int) $pdo->lastInsertId(), 'Tipo: ' . $tipoAcao);
+
+        header('Location: /processos?ok=modelo_criado');
+        exit;
+    }
+
+    public static function aplicarModeloChecklistSelecionado($processoId)
+    {
+        $modeloId = (int) ($_POST['modelo_id'] ?? 0);
+        self::aplicarModeloChecklist($processoId, $modeloId);
+    }
+
+    public static function aplicarModeloChecklist($processoId, $modeloId)
+    {
+        global $pdo;
+
+        if (!isset($_SESSION['usuario_id'])) {
+            header('Location: /login');
+            exit;
+        }
+
+        $usuarioId = (int) $_SESSION['usuario_id'];
+        $processoId = (int) $processoId;
+        $modeloId = (int) $modeloId;
+
+        $stmt = $pdo->prepare("SELECT id FROM processos WHERE id = ? AND usuario_id = ?");
+        $stmt->execute([$processoId, $usuarioId]);
+        if (!$stmt->fetch()) {
+            header('Location: /processos?erro=processo_invalido');
+            exit;
+        }
+
+        $stmt = $pdo->prepare("SELECT id, itens_json, nome FROM checklist_modelos WHERE id = ? AND usuario_id = ? AND ativo = 1");
+        $stmt->execute([$modeloId, $usuarioId]);
+        $modelo = $stmt->fetch();
+
+        if (!$modelo) {
+            header('Location: /processos/' . $processoId . '?erro=modelo_invalido');
+            exit;
+        }
+
+        $itens = json_decode($modelo['itens_json'] ?? '[]', true);
+        if (!is_array($itens) || empty($itens)) {
+            header('Location: /processos/' . $processoId . '?erro=modelo_vazio');
+            exit;
+        }
+
+        $stmt = $pdo->prepare("INSERT IGNORE INTO processo_checklist_itens (processo_id, usuario_id, titulo, concluido)
+            VALUES (?, ?, ?, 0)");
+        $inseridos = 0;
+        foreach ($itens as $titulo) {
+            $titulo = trim((string) $titulo);
+            if ($titulo === '') {
+                continue;
+            }
+            $stmt->execute([$processoId, $usuarioId, $titulo]);
+            $inseridos += (int) $stmt->rowCount();
+        }
+
+        Audit::registrar('Modelo checklist aplicado', 'processo_checklist_itens', $processoId, 'Modelo: ' . $modelo['nome'] . '; Itens novos: ' . $inseridos);
+
+        header('Location: /processos/' . $processoId);
+        exit;
+    }
+
+    public static function desativarModeloChecklist($modeloId)
+    {
+        global $pdo;
+
+        if (!isset($_SESSION['usuario_id'])) {
+            header('Location: /login');
+            exit;
+        }
+
+        $usuarioId = (int) $_SESSION['usuario_id'];
+        $modeloId = (int) $modeloId;
+        $processoId = (int) ($_POST['processo_id'] ?? 0);
+
+        $stmt = $pdo->prepare("UPDATE checklist_modelos SET ativo = 0 WHERE id = ? AND usuario_id = ?");
+        $stmt->execute([$modeloId, $usuarioId]);
+
+        Audit::registrar('Modelo checklist desativado', 'checklist_modelos', $modeloId, null);
+
+        if ($processoId > 0) {
+            header('Location: /processos/' . $processoId);
+        } else {
+            header('Location: /processos');
+        }
+        exit;
+    }
+
     public static function toggleChecklistItem($itemId)
     {
         global $pdo;
@@ -134,7 +250,34 @@ class FaseCController
         $conteudo = trim($_POST['conteudo'] ?? '');
         $observacao = trim($_POST['observacao'] ?? '');
 
-        if ($titulo === '' || $conteudo === '') {
+        $arquivoOriginal = null;
+        $arquivoCaminho = null;
+
+        if (!empty($_FILES['arquivo_peticao']['name']) && ($_FILES['arquivo_peticao']['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_OK) {
+            $nomeTmp = $_FILES['arquivo_peticao']['tmp_name'];
+            $nomeOriginal = basename((string) $_FILES['arquivo_peticao']['name']);
+            $ext = strtolower(pathinfo($nomeOriginal, PATHINFO_EXTENSION));
+            $permitidas = ['pdf', 'doc', 'docx', 'txt'];
+
+            if (!in_array($ext, $permitidas, true)) {
+                header('Location: /processos/' . $processoId . '?erro=arquivo_invalido');
+                exit;
+            }
+
+            $dir = __DIR__ . '/../../public/uploads/peticoes';
+            if (!is_dir($dir)) {
+                @mkdir($dir, 0775, true);
+            }
+
+            $arquivoSeguro = uniqid('peticao_', true) . '.' . $ext;
+            $destino = $dir . '/' . $arquivoSeguro;
+            if (@move_uploaded_file($nomeTmp, $destino)) {
+                $arquivoOriginal = $nomeOriginal;
+                $arquivoCaminho = '/uploads/peticoes/' . $arquivoSeguro;
+            }
+        }
+
+        if ($titulo === '' || ($conteudo === '' && $arquivoCaminho === null)) {
             header('Location: /processos/' . $processoId . '?erro=peticao_invalida');
             exit;
         }
@@ -164,9 +307,9 @@ class FaseCController
             $stmt->execute([$peticaoId]);
             $proximaVersao = (int) ($stmt->fetch()['proxima'] ?? 1);
 
-            $stmt = $pdo->prepare("INSERT INTO peticao_versoes (peticao_id, usuario_id, versao, observacao, conteudo)
-                VALUES (?, ?, ?, ?, ?)");
-            $stmt->execute([$peticaoId, $usuarioId, $proximaVersao, $observacao, $conteudo]);
+            $stmt = $pdo->prepare("INSERT INTO peticao_versoes (peticao_id, usuario_id, versao, observacao, conteudo, arquivo_original, arquivo_caminho)
+                VALUES (?, ?, ?, ?, ?, ?, ?)");
+            $stmt->execute([$peticaoId, $usuarioId, $proximaVersao, $observacao, $conteudo !== '' ? $conteudo : null, $arquivoOriginal, $arquivoCaminho]);
 
             $pdo->commit();
 
@@ -206,10 +349,11 @@ class FaseCController
             exit;
         }
 
-        $stmt = $pdo->prepare("SELECT id, versao, observacao, conteudo, criado_em
-            FROM peticao_versoes
-            WHERE peticao_id = ?
-            ORDER BY versao DESC");
+        $stmt = $pdo->prepare("SELECT pv.id, pv.versao, pv.observacao, pv.conteudo, pv.arquivo_original, pv.arquivo_caminho, pv.criado_em, u.nome AS autor_nome
+            FROM peticao_versoes pv
+            LEFT JOIN usuarios u ON u.id = pv.usuario_id
+            WHERE pv.peticao_id = ?
+            ORDER BY pv.versao DESC");
         $stmt->execute([$peticaoId]);
         $versoes = $stmt->fetchAll();
 
@@ -228,7 +372,7 @@ class FaseCController
         $usuarioId = (int) $_SESSION['usuario_id'];
         $versaoId = (int) $versaoId;
 
-        $stmt = $pdo->prepare("SELECT pv.id, pv.peticao_id, pv.conteudo, p.processo_id, p.usuario_id
+        $stmt = $pdo->prepare("SELECT pv.id, pv.peticao_id, pv.conteudo, pv.arquivo_original, pv.arquivo_caminho, p.processo_id, p.usuario_id
             FROM peticao_versoes pv
             INNER JOIN peticoes p ON p.id = pv.peticao_id
             WHERE pv.id = ?");
@@ -246,14 +390,16 @@ class FaseCController
         $stmt->execute([$peticaoId]);
         $proxima = (int) ($stmt->fetch()['proxima'] ?? 1);
 
-        $stmt = $pdo->prepare("INSERT INTO peticao_versoes (peticao_id, usuario_id, versao, observacao, conteudo)
-            VALUES (?, ?, ?, ?, ?)");
+        $stmt = $pdo->prepare("INSERT INTO peticao_versoes (peticao_id, usuario_id, versao, observacao, conteudo, arquivo_original, arquivo_caminho)
+            VALUES (?, ?, ?, ?, ?, ?, ?)");
         $stmt->execute([
             $peticaoId,
             $usuarioId,
             $proxima,
             'Versão derivada automaticamente da versão #' . $versaoId,
-            (string) $base['conteudo'],
+            !empty($base['conteudo']) ? (string) $base['conteudo'] : null,
+            !empty($base['arquivo_original']) ? (string) $base['arquivo_original'] : null,
+            !empty($base['arquivo_caminho']) ? (string) $base['arquivo_caminho'] : null,
         ]);
 
         Audit::registrar('Petição derivada', 'peticao_versoes', (int) $pdo->lastInsertId(), 'Base versão ID: ' . $versaoId);

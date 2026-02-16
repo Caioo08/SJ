@@ -452,6 +452,22 @@ h1 {
                         </div>
                     <?php endforeach; ?>
                 <?php endif; ?>
+
+                <?php if (!empty($checklistModelos)): ?>
+                    <form method="POST" action="/processos/<?= (int)$processo['id'] ?>/checklist/modelo/aplicar" style="margin-bottom:10px;">
+                        <?= Csrf::field() ?>
+                        <select class="field-input" name="modelo_id" required>
+                            <option value="">Selecione um modelo de checklist</option>
+                            <?php foreach($checklistModelos as $m): ?>
+                                <?php if ((int)($m['ativo'] ?? 0) === 1): ?>
+                                    <option value="<?= (int)$m['id'] ?>"><?= htmlspecialchars($m['nome']) ?> (<?= htmlspecialchars($m['tipo_acao'] ?: 'geral') ?>)</option>
+                                <?php endif; ?>
+                            <?php endforeach; ?>
+                        </select>
+                        <button type="submit" class="btn btn-secondary" style="width:100%;justify-content:center;">Aplicar modelo selecionado</button>
+                    </form>
+                <?php endif; ?>
+
                 <form method="POST" action="/processos/<?= (int)$processo['id'] ?>/checklist/adicionar">
                     <?= Csrf::field() ?>
                     <input class="field-input" type="text" name="titulo" placeholder="Novo item de checklist" required>
@@ -477,11 +493,12 @@ h1 {
                         <?php endforeach; ?>
                     </div>
                 <?php endif; ?>
-                <form method="POST" action="/processos/<?= (int)$processo['id'] ?>/peticoes/versao">
+                <form method="POST" action="/processos/<?= (int)$processo['id'] ?>/peticoes/versao" enctype="multipart/form-data">
                     <?= Csrf::field() ?>
                     <input class="field-input" type="text" name="titulo" placeholder="Título da petição" required>
                     <input class="field-input" type="text" name="observacao" placeholder="Observação da versão (opcional)">
-                    <textarea class="field-input" name="conteudo" rows="4" placeholder="Conteúdo/rascunho da versão" required></textarea>
+                    <textarea class="field-input" name="conteudo" rows="4" placeholder="Conteúdo/rascunho da versão (ou envie um arquivo)"></textarea>
+                    <input class="field-input" type="file" name="arquivo_peticao" accept=".pdf,.doc,.docx,.txt">
                     <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;">Salvar nova versão</button>
                 </form>
             </div>
@@ -497,6 +514,29 @@ h1 {
                         📄 Adicionar Documento
                     </a>
                 </div>
+                <hr style="border-color:var(--border);margin:14px 0;">
+                <form method="POST" action="/checklists/modelos/store">
+                    <?= Csrf::field() ?>
+                    <input class="field-input" type="text" name="nome" placeholder="Nome do modelo (ex: Trabalhista inicial)" required>
+                    <input class="field-input" type="text" name="tipo_acao" placeholder="Tipo de ação (ex: trabalhista)">
+                    <textarea class="field-input" name="itens" rows="4" placeholder="Um item por linha" required></textarea>
+                    <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;">Salvar modelo de checklist</button>
+                </form>
+
+                <?php if (!empty($checklistModelos)): ?>
+                    <div style="margin-top:12px;display:grid;gap:8px;">
+                        <?php foreach($checklistModelos as $m): ?>
+                            <form method="POST" action="/checklists/modelos/<?= (int)$m['id'] ?>/desativar" style="display:flex;gap:8px;align-items:center;">
+                                <?= Csrf::field() ?>
+                                <input type="hidden" name="processo_id" value="<?= (int)$processo['id'] ?>">
+                                <div class="small-text" style="flex:1;"><?= htmlspecialchars($m['nome']) ?> • <?= htmlspecialchars($m['tipo_acao'] ?: 'geral') ?> • <?= (int)$m['ativo'] === 1 ? 'ativo' : 'inativo' ?></div>
+                                <?php if ((int)$m['ativo'] === 1): ?>
+                                    <button type="submit" class="btn btn-danger" style="padding:6px 10px;">Desativar</button>
+                                <?php endif; ?>
+                            </form>
+                        <?php endforeach; ?>
+                    </div>
+                <?php endif; ?>
             </div>
         </div>
     </div>
