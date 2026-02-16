@@ -240,6 +240,17 @@ h1 {
     color: var(--muted);
 }
 
+
+.check-item {display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px;border:1px solid var(--border);border-radius:8px;background:var(--bg-secondary);margin-bottom:8px;}
+.check-item.done {opacity:.75}
+.check-title.done {text-decoration:line-through;color:var(--muted)}
+.inline-form{margin:0}
+.field-input{width:100%;padding:10px 12px;border-radius:8px;border:1px solid var(--border);background:var(--bg-secondary);color:var(--primary);margin-bottom:8px}
+.small-text{font-size:12px;color:var(--muted)}
+.progress-wrap{background:#121212;border:1px solid var(--border);border-radius:10px;padding:8px;margin-bottom:10px}
+.progress-bar{height:10px;border-radius:999px;background:rgba(255,255,255,.08);overflow:hidden}
+.progress-fill{height:100%;background:linear-gradient(90deg,#d4af37,#f1c65b)}
+
 @media (max-width: 968px) {
     .content-grid {
         grid-template-columns: 1fr;
@@ -325,22 +336,27 @@ h1 {
             <div class="card" style="margin-top: 24px;">
                 <h2>📅 Linha do Tempo</h2>
                 <div class="timeline">
-                    <div class="timeline-item">
-                        <div class="timeline-icon">📝</div>
-                        <div class="timeline-content">
-                            <div class="timeline-title">Processo Criado</div>
-                            <div class="timeline-date"><?= date('d/m/Y H:i', strtotime($processo['criado_em'])) ?></div>
+                    <?php if (empty($eventos)): ?>
+                        <div class="timeline-item">
+                            <div class="timeline-icon">ℹ️</div>
+                            <div class="timeline-content">
+                                <div class="timeline-title">Sem eventos registrados</div>
+                                <div class="timeline-date">Os próximos eventos deste processo aparecerão aqui.</div>
+                            </div>
                         </div>
-                    </div>
-
-                    <?php if($processo['atualizado_em'] != $processo['criado_em']): ?>
-                    <div class="timeline-item">
-                        <div class="timeline-icon">🔄</div>
-                        <div class="timeline-content">
-                            <div class="timeline-title">Última Atualização</div>
-                            <div class="timeline-date"><?= date('d/m/Y H:i', strtotime($processo['atualizado_em'])) ?></div>
-                        </div>
-                    </div>
+                    <?php else: ?>
+                        <?php foreach($eventos as $ev): ?>
+                            <div class="timeline-item">
+                                <div class="timeline-icon">📝</div>
+                                <div class="timeline-content">
+                                    <div class="timeline-title"><?= htmlspecialchars($ev['titulo']) ?></div>
+                                    <?php if(!empty($ev['descricao'])): ?>
+                                        <div style="color: var(--muted); font-size: 13px; margin: 4px 0 6px;"><?= htmlspecialchars($ev['descricao']) ?></div>
+                                    <?php endif; ?>
+                                    <div class="timeline-date"><?= date('d/m/Y H:i', strtotime($ev['criado_em'])) ?></div>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
                     <?php endif; ?>
                 </div>
             </div>
@@ -408,6 +424,85 @@ h1 {
                 </div>
             </div>
 
+
+            <!-- Fase C: Checklist do Processo -->
+            <div class="card" style="margin-top: 24px;">
+                <h2>✅ Checklist</h2>
+                <div class="progress-wrap">
+                    <div class="small-text">Progresso: <?= (int)($checklistResumo['concluidos'] ?? 0) ?>/<?= (int)($checklistResumo['total'] ?? 0) ?> (<?= (int)($checklistResumo['percentual'] ?? 0) ?>%)</div>
+                    <div class="progress-bar"><div class="progress-fill" style="width: <?= (int)($checklistResumo['percentual'] ?? 0) ?>%;"></div></div>
+                </div>
+                <?php if (empty($checklistItens)): ?>
+                    <p class="small-text">Nenhum item de checklist ainda.</p>
+                    <form method="POST" action="/processos/<?= (int)$processo['id'] ?>/checklist/padrao" style="margin-bottom:10px;">
+                        <?= Csrf::field() ?>
+                        <button type="submit" class="btn btn-secondary" style="width:100%;justify-content:center;">Aplicar checklist padrão</button>
+                    </form>
+                <?php else: ?>
+                    <?php foreach($checklistItens as $item): ?>
+                        <div class="check-item <?= (int)$item['concluido'] === 1 ? 'done' : '' ?>">
+                            <div>
+                                <div class="check-title <?= (int)$item['concluido'] === 1 ? 'done' : '' ?>"><?= htmlspecialchars($item['titulo']) ?></div>
+                                <div class="small-text">Criado em <?= date('d/m/Y H:i', strtotime($item['criado_em'])) ?></div>
+                            </div>
+                            <form method="POST" action="/processos/checklist/<?= (int)$item['id'] ?>/toggle" class="inline-form">
+                                <?= Csrf::field() ?>
+                                <button type="submit" class="btn btn-secondary" style="padding:8px 10px;"><?= (int)$item['concluido'] === 1 ? 'Reabrir' : 'Concluir' ?></button>
+                            </form>
+                        </div>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+
+                <?php if (!empty($checklistModelos)): ?>
+                    <form method="POST" action="/processos/<?= (int)$processo['id'] ?>/checklist/modelo/aplicar" style="margin-bottom:10px;">
+                        <?= Csrf::field() ?>
+                        <select class="field-input" name="modelo_id" required>
+                            <option value="">Selecione um modelo de checklist</option>
+                            <?php foreach($checklistModelos as $m): ?>
+                                <?php if ((int)($m['ativo'] ?? 0) === 1): ?>
+                                    <option value="<?= (int)$m['id'] ?>"><?= htmlspecialchars($m['nome']) ?> (<?= htmlspecialchars($m['tipo_acao'] ?: 'geral') ?>)</option>
+                                <?php endif; ?>
+                            <?php endforeach; ?>
+                        </select>
+                        <button type="submit" class="btn btn-secondary" style="width:100%;justify-content:center;">Aplicar modelo selecionado</button>
+                    </form>
+                <?php endif; ?>
+
+                <form method="POST" action="/processos/<?= (int)$processo['id'] ?>/checklist/adicionar">
+                    <?= Csrf::field() ?>
+                    <input class="field-input" type="text" name="titulo" placeholder="Novo item de checklist" required>
+                    <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;">Adicionar item</button>
+                </form>
+            </div>
+
+            <!-- Fase C: Petições versionadas -->
+            <div class="card" style="margin-top: 24px;">
+                <h2>🧾 Petições (versionamento)</h2>
+                <?php if (empty($peticoes)): ?>
+                    <p class="small-text">Sem petições registradas.</p>
+                <?php else: ?>
+                    <div style="display:grid;gap:10px;margin-bottom:12px;">
+                        <?php foreach($peticoes as $pt): ?>
+                            <div class="check-item" style="align-items:flex-start;">
+                                <div>
+                                    <strong><?= htmlspecialchars($pt['titulo']) ?></strong> <a href="/processos/<?= (int)$processo['id'] ?>/peticoes/<?= (int)$pt['peticao_id'] ?>" class="small-text" style="margin-left:8px;">ver histórico</a>
+                                    <div class="small-text">Versão <?= (int)($pt['versao'] ?? 1) ?> • <?= !empty($pt['criado_em']) ? date('d/m/Y H:i', strtotime($pt['criado_em'])) : '-' ?></div>
+                                    <?php if(!empty($pt['observacao'])): ?><div class="small-text">Obs: <?= htmlspecialchars($pt['observacao']) ?></div><?php endif; ?>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                <?php endif; ?>
+                <form method="POST" action="/processos/<?= (int)$processo['id'] ?>/peticoes/versao" enctype="multipart/form-data">
+                    <?= Csrf::field() ?>
+                    <input class="field-input" type="text" name="titulo" placeholder="Título da petição" required>
+                    <input class="field-input" type="text" name="observacao" placeholder="Observação da versão (opcional)">
+                    <textarea class="field-input" name="conteudo" rows="4" placeholder="Conteúdo/rascunho da versão (ou envie um arquivo)"></textarea>
+                    <input class="field-input" type="file" name="arquivo_peticao" accept=".pdf,.doc,.docx,.txt">
+                    <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;">Salvar nova versão</button>
+                </form>
+            </div>
+
             <!-- Ações Rápidas -->
             <div class="card" style="margin-top: 24px;">
                 <h2>⚡ Ações Rápidas</h2>
@@ -419,6 +514,29 @@ h1 {
                         📄 Adicionar Documento
                     </a>
                 </div>
+                <hr style="border-color:var(--border);margin:14px 0;">
+                <form method="POST" action="/checklists/modelos/store">
+                    <?= Csrf::field() ?>
+                    <input class="field-input" type="text" name="nome" placeholder="Nome do modelo (ex: Trabalhista inicial)" required>
+                    <input class="field-input" type="text" name="tipo_acao" placeholder="Tipo de ação (ex: trabalhista)">
+                    <textarea class="field-input" name="itens" rows="4" placeholder="Um item por linha" required></textarea>
+                    <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;">Salvar modelo de checklist</button>
+                </form>
+
+                <?php if (!empty($checklistModelos)): ?>
+                    <div style="margin-top:12px;display:grid;gap:8px;">
+                        <?php foreach($checklistModelos as $m): ?>
+                            <form method="POST" action="/checklists/modelos/<?= (int)$m['id'] ?>/desativar" style="display:flex;gap:8px;align-items:center;">
+                                <?= Csrf::field() ?>
+                                <input type="hidden" name="processo_id" value="<?= (int)$processo['id'] ?>">
+                                <div class="small-text" style="flex:1;"><?= htmlspecialchars($m['nome']) ?> • <?= htmlspecialchars($m['tipo_acao'] ?: 'geral') ?> • <?= (int)$m['ativo'] === 1 ? 'ativo' : 'inativo' ?></div>
+                                <?php if ((int)$m['ativo'] === 1): ?>
+                                    <button type="submit" class="btn btn-danger" style="padding:6px 10px;">Desativar</button>
+                                <?php endif; ?>
+                            </form>
+                        <?php endforeach; ?>
+                    </div>
+                <?php endif; ?>
             </div>
         </div>
     </div>

@@ -1,6 +1,7 @@
 <?php
 
 require_once '../config/database.php';
+require_once '../app/helpers/Audit.php';
 
 class ConfiguracoesController
 {
@@ -108,6 +109,7 @@ class ConfiguracoesController
 
             // Atualizar nome na sessão
             $_SESSION['usuario_nome'] = $nome;
+            Audit::registrar('Perfil atualizado', 'usuarios', (int) $usuario_id, 'Nome: ' . $nome);
 
             header('Location: /configuracoes?sucesso=perfil');
             exit;
@@ -169,6 +171,8 @@ class ConfiguracoesController
                 ':id' => $usuario_id
             ]);
 
+            Audit::registrar('Senha atualizada', 'usuarios', (int) $usuario_id, null);
+
             header('Location: /configuracoes?sucesso=senha');
             exit;
 
@@ -210,6 +214,8 @@ class ConfiguracoesController
             if (is_dir($uploadDir)) {
                 rmdir($uploadDir);
             }
+
+            Audit::registrar('Conta excluída', 'usuarios', (int) $usuario_id, null);
 
             // Deletar usuário (cascata deleta tudo relacionado)
             $stmt = $pdo->prepare("DELETE FROM usuarios WHERE id = ?");
@@ -270,6 +276,8 @@ class ConfiguracoesController
             ':uf' => $escritorio_uf,
             ':id' => $usuario_id
         ]);
+
+        Audit::registrar('Endereço do escritório atualizado', 'usuarios', (int) $usuario_id, null);
 
         header('Location: /configuracoes?sucesso=escritorio');
         exit;
