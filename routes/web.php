@@ -167,9 +167,38 @@ elseif (preg_match('#^/processos/(\d+)/checklist/padrao$#', $uri, $matches) && $
 }
 
 
+elseif ($uri === '/checklists/modelos' && $method === 'GET') {
+    AuthMiddleware::verificarAdvogado();
+    FaseCController::modelos();
+}
+
 elseif ($uri === '/checklists/modelos/store' && $method === 'POST') {
     AuthMiddleware::verificarAdvogado();
     FaseCController::salvarModeloChecklist();
+}
+
+elseif (preg_match('#^/checklists/modelos/(\d+)/editar$#', $uri, $matches) && $method === 'GET') {
+    AuthMiddleware::verificarAdvogado();
+    $modeloId = $matches[1];
+    FaseCController::editarModelo($modeloId);
+}
+
+elseif (preg_match('#^/checklists/modelos/(\d+)/atualizar$#', $uri, $matches) && $method === 'POST') {
+    AuthMiddleware::verificarAdvogado();
+    $modeloId = $matches[1];
+    FaseCController::atualizarModelo($modeloId);
+}
+
+elseif (preg_match('#^/checklists/modelos/(\d+)/toggle$#', $uri, $matches) && $method === 'POST') {
+    AuthMiddleware::verificarAdvogado();
+    $modeloId = $matches[1];
+    FaseCController::toggleModeloChecklist($modeloId);
+}
+
+elseif (preg_match('#^/checklists/modelos/(\d+)/excluir$#', $uri, $matches) && $method === 'POST') {
+    AuthMiddleware::verificarAdvogado();
+    $modeloId = $matches[1];
+    FaseCController::excluirModeloChecklist($modeloId);
 }
 
 elseif (preg_match('#^/processos/(\d+)/checklist/modelo/(\d+)/aplicar$#', $uri, $matches) && $method === 'POST') {
@@ -189,7 +218,7 @@ elseif (preg_match('#^/processos/(\d+)/checklist/modelo/aplicar$#', $uri, $match
 elseif (preg_match('#^/checklists/modelos/(\d+)/desativar$#', $uri, $matches) && $method === 'POST') {
     AuthMiddleware::verificarAdvogado();
     $modeloId = $matches[1];
-    FaseCController::desativarModeloChecklist($modeloId);
+    FaseCController::toggleModeloChecklist($modeloId);
 }
 
 elseif (preg_match('#^/processos/(\d+)/peticoes/(\d+)$#', $uri, $matches) && $method === 'GET') {

@@ -100,8 +100,9 @@ class FaseCController
         $nome = trim($_POST['nome'] ?? '');
         $tipoAcao = trim($_POST['tipo_acao'] ?? 'geral');
         $itensBrutos = trim($_POST['itens'] ?? '');
+        $itensBrutos = trim($_POST['itens'] ?? '');
 
-        $itens = array_values(array_filter(array_map('trim', preg_split('/\r\n|\r|\n/', $itensBrutos ?: ''))));
+        $itens = array_values(array_filter(array_map('trim', preg_split('/\R+/', $itensBrutos ?: ''))));
 
         if ($nome === '' || empty($itens)) {
             header('Location: /processos?erro=modelo_invalido');
@@ -181,10 +182,7 @@ class FaseCController
         $nome = trim($_POST['nome'] ?? '');
         $tipoAcao = trim($_POST['tipo_acao'] ?? 'geral');
         $itensBrutos = trim($_POST['itens'] ?? '');
-        $itens = array_values(array_filter(array_map('trim', preg_split('/
-|
-|
-/', $itensBrutos ?: ''))));
+        $itens = array_values(array_filter(array_map('trim', preg_split('/\\R+/', $itensBrutos ?: ''))));
 
         if ($nome === '' || empty($itens)) {
             header('Location: /checklists/modelos/' . $modeloId . '/editar?erro=modelo_invalido');

@@ -459,6 +459,10 @@ h1 {
                     <?php endforeach; ?>
                 <?php endif; ?>
 
+                <div style="margin:10px 0;">
+                    <a href="/checklists/modelos" class="small-text">Gerenciar todos os modelos de checklist</a>
+                </div>
+
                 <?php if (!empty($checklistModelos)): ?>
                     <form method="POST" action="/processos/<?= (int)$processo['id'] ?>/checklist/modelo/aplicar" style="margin-bottom:10px;">
                         <?= Csrf::field() ?>
@@ -532,13 +536,12 @@ h1 {
                 <?php if (!empty($checklistModelos)): ?>
                     <div style="margin-top:12px;display:grid;gap:8px;">
                         <?php foreach($checklistModelos as $m): ?>
-                            <form method="POST" action="/checklists/modelos/<?= (int)$m['id'] ?>/desativar" style="display:flex;gap:8px;align-items:center;">
+                            <form method="POST" action="/checklists/modelos/<?= (int)$m['id'] ?>/toggle" style="display:flex;gap:8px;align-items:center;">
                                 <?= Csrf::field() ?>
                                 <input type="hidden" name="processo_id" value="<?= (int)$processo['id'] ?>">
                                 <div class="small-text" style="flex:1;"><?= htmlspecialchars($m['nome']) ?> • <?= htmlspecialchars($m['tipo_acao'] ?: 'geral') ?> • <?= (int)$m['ativo'] === 1 ? 'ativo' : 'inativo' ?></div>
-                                <?php if ((int)$m['ativo'] === 1): ?>
-                                    <button type="submit" class="btn btn-danger" style="padding:6px 10px;">Desativar</button>
-                                <?php endif; ?>
+                                <button type="submit" class="btn btn-danger" style="padding:6px 10px;"><?= (int)$m['ativo'] === 1 ? 'Desativar' : 'Ativar' ?></button>
+                                <a href="/checklists/modelos/<?= (int)$m['id'] ?>/editar" class="small-text">Editar</a>
                             </form>
                         <?php endforeach; ?>
                     </div>
