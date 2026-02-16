@@ -130,7 +130,7 @@ h1 {
     border: 1px solid var(--border);
 }
 
-.search-box input {
+.search-box input, .search-box select {
     width: 100%;
     padding: 12px;
     border-radius: 6px;
@@ -310,7 +310,15 @@ h1 {
     <h1>📋 Logs de Auditoria</h1>
 
     <div class="search-box">
-        <input type="text" id="searchInput" placeholder="🔍 Buscar por ação, usuário ou detalhes...">
+        <form method="GET" style="display:grid;grid-template-columns:2fr 1fr auto;gap:10px;align-items:center;">
+            <input type="text" name="acao" id="searchInput" value="<?= htmlspecialchars($acaoFiltro ?? '') ?>" placeholder="🔍 Filtrar ação, usuário ou detalhes...">
+            <select name="periodo">
+                <option value="24h" <?= ($periodoFiltro ?? '7d') === '24h' ? 'selected' : '' ?>>Últimas 24h</option>
+                <option value="7d" <?= ($periodoFiltro ?? '7d') === '7d' ? 'selected' : '' ?>>Últimos 7 dias</option>
+                <option value="30d" <?= ($periodoFiltro ?? '7d') === '30d' ? 'selected' : '' ?>>Últimos 30 dias</option>
+            </select>
+            <button type="submit" style="padding:12px 16px;border:none;border-radius:6px;background:var(--danger);color:white;font-weight:600;cursor:pointer;">Aplicar</button>
+        </form>
     </div>
 
     <div class="logs-container">
