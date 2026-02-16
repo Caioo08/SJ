@@ -118,6 +118,145 @@ class FaseCController
         exit;
     }
 
+
+    public static function modelos()
+    {
+        global $pdo;
+
+        if (!isset($_SESSION['usuario_id'])) {
+            header('Location: /login');
+            exit;
+        }
+
+        $usuarioId = (int) $_SESSION['usuario_id'];
+
+        $stmt = $pdo->prepare("SELECT id, nome, tipo_acao, ativo, criado_em FROM checklist_modelos WHERE usuario_id = ? ORDER BY ativo DESC, nome ASC");
+        $stmt->execute([$usuarioId]);
+        $modelos = $stmt->fetchAll();
+
+        require_once '../views/checklists/modelos_index.php';
+    }
+
+    public static function editarModelo($modeloId)
+    {
+        global $pdo;
+
+        if (!isset($_SESSION['usuario_id'])) {
+            header('Location: /login');
+            exit;
+        }
+
+        $usuarioId = (int) $_SESSION['usuario_id'];
+        $modeloId = (int) $modeloId;
+
+        $stmt = $pdo->prepare("SELECT id, nome, tipo_acao, itens_json, ativo FROM checklist_modelos WHERE id = ? AND usuario_id = ?");
+        $stmt->execute([$modeloId, $usuarioId]);
+        $modelo = $stmt->fetch();
+
+        if (!$modelo) {
+            header('Location: /checklists/modelos?erro=modelo_invalido');
+            exit;
+        }
+
+        $itens = json_decode($modelo['itens_json'] ?? '[]', true);
+        if (!is_array($itens)) {
+            $itens = [];
+        }
+
+        require_once '../views/checklists/modelos_edit.php';
+    }
+
+    public static function atualizarModelo($modeloId)
+    {
+        global $pdo;
+
+        if (!isset($_SESSION['usuario_id'])) {
+            header('Location: /login');
+            exit;
+        }
+
+        $usuarioId = (int) $_SESSION['usuario_id'];
+        $modeloId = (int) $modeloId;
+
+        $nome = trim($_POST['nome'] ?? '');
+        $tipoAcao = trim($_POST['tipo_acao'] ?? 'geral');
+        $itensBrutos = trim($_POST['itens'] ?? '');
+        $itens = array_values(array_filter(array_map('trim', preg_split('/
+|
+|
+/', $itensBrutos ?: ''))));
+
+        if ($nome === '' || empty($itens)) {
+            header('Location: /checklists/modelos/' . $modeloId . '/editar?erro=modelo_invalido');
+            exit;
+        }
+
+        $stmt = $pdo->prepare("UPDATE checklist_modelos SET nome = ?, tipo_acao = ?, itens_json = ? WHERE id = ? AND usuario_id = ?");
+        $stmt->execute([$nome, $tipoAcao, json_encode($itens, JSON_UNESCAPED_UNICODE), $modeloId, $usuarioId]);
+
+        Audit::registrar('Modelo checklist atualizado', 'checklist_modelos', $modeloId, 'Tipo: ' . $tipoAcao);
+
+        header('Location: /checklists/modelos');
+        exit;
+    }
+
+    public static function toggleModeloChecklist($modeloId)
+    {
+        global $pdo;
+
+        if (!isset($_SESSION['usuario_id'])) {
+            header('Location: /login');
+            exit;
+        }
+
+        $usuarioId = (int) $_SESSION['usuario_id'];
+        $modeloId = (int) $modeloId;
+
+        $stmt = $pdo->prepare("SELECT id, ativo FROM checklist_modelos WHERE id = ? AND usuario_id = ?");
+        $stmt->execute([$modeloId, $usuarioId]);
+        $modelo = $stmt->fetch();
+
+        if (!$modelo) {
+            header('Location: /checklists/modelos?erro=modelo_invalido');
+            exit;
+        }
+
+        $novo = ((int) $modelo['ativo'] === 1) ? 0 : 1;
+        $stmt = $pdo->prepare("UPDATE checklist_modelos SET ativo = ? WHERE id = ? AND usuario_id = ?");
+        $stmt->execute([$novo, $modeloId, $usuarioId]);
+
+        Audit::registrar('Modelo checklist alternado', 'checklist_modelos', $modeloId, 'Ativo: ' . $novo);
+
+        $processoId = (int) ($_POST['processo_id'] ?? 0);
+        if ($processoId > 0) {
+            header('Location: /processos/' . $processoId);
+        } else {
+            header('Location: /checklists/modelos');
+        }
+        exit;
+    }
+
+    public static function excluirModeloChecklist($modeloId)
+    {
+        global $pdo;
+
+        if (!isset($_SESSION['usuario_id'])) {
+            header('Location: /login');
+            exit;
+        }
+
+        $usuarioId = (int) $_SESSION['usuario_id'];
+        $modeloId = (int) $modeloId;
+
+        $stmt = $pdo->prepare("DELETE FROM checklist_modelos WHERE id = ? AND usuario_id = ?");
+        $stmt->execute([$modeloId, $usuarioId]);
+
+        Audit::registrar('Modelo checklist excluído', 'checklist_modelos', $modeloId, null);
+
+        header('Location: /checklists/modelos');
+        exit;
+    }
+
     public static function aplicarModeloChecklistSelecionado($processoId)
     {
         $modeloId = (int) ($_POST['modelo_id'] ?? 0);
