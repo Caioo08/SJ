@@ -218,7 +218,7 @@ elseif (preg_match('#^/processos/(\d+)/checklist/modelo/aplicar$#', $uri, $match
 elseif (preg_match('#^/checklists/modelos/(\d+)/desativar$#', $uri, $matches) && $method === 'POST') {
     AuthMiddleware::verificarAdvogado();
     $modeloId = $matches[1];
-    FaseCController::toggleModeloChecklist($modeloId);
+    FaseCController::desativarModeloChecklist($modeloId);
 }
 
 elseif (preg_match('#^/processos/(\d+)/peticoes/(\d+)$#', $uri, $matches) && $method === 'GET') {

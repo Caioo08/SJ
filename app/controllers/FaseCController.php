@@ -327,15 +327,29 @@ class FaseCController
         $modeloId = (int) $modeloId;
         $processoId = (int) ($_POST['processo_id'] ?? 0);
 
-        $stmt = $pdo->prepare("UPDATE checklist_modelos SET ativo = 0 WHERE id = ? AND usuario_id = ?");
+        $stmt = $pdo->prepare("SELECT id, ativo FROM checklist_modelos WHERE id = ? AND usuario_id = ?");
         $stmt->execute([$modeloId, $usuarioId]);
+        $modelo = $stmt->fetch();
 
-        Audit::registrar('Modelo checklist desativado', 'checklist_modelos', $modeloId, null);
+        if (!$modelo) {
+            if ($processoId > 0) {
+                header('Location: /processos/' . $processoId . '?erro=modelo_invalido');
+            } else {
+                header('Location: /checklists/modelos?erro=modelo_invalido');
+            }
+            exit;
+        }
+
+        if ((int) $modelo['ativo'] !== 0) {
+            $stmt = $pdo->prepare("UPDATE checklist_modelos SET ativo = 0 WHERE id = ? AND usuario_id = ?");
+            $stmt->execute([$modeloId, $usuarioId]);
+            Audit::registrar('Modelo checklist desativado', 'checklist_modelos', $modeloId, null);
+        }
 
         if ($processoId > 0) {
             header('Location: /processos/' . $processoId);
         } else {
-            header('Location: /processos');
+            header('Location: /checklists/modelos');
         }
         exit;
     }
