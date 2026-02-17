@@ -213,6 +213,7 @@ a.btn:hover {
     <div class="card">
         <h1>⚖️ Novo Processo</h1>
         <form action="/processos/store" method="POST">
+            <?= Csrf::field() ?>
             
             <!-- Cliente -->
             <div class="form-section">

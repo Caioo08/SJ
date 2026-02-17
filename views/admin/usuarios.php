@@ -340,11 +340,12 @@ tbody tr:hover {
                             <td><?= date('d/m/Y', strtotime($u['criado_em'])) ?></td>
                             <td>
                                 <a href="/admin/usuarios/<?= $u['id'] ?>" class="btn btn-view">👁️ Ver</a>
-                                <a href="/admin/usuarios/toggle/<?= $u['id'] ?>" 
-                                   class="btn btn-toggle"
-                                   onclick="return confirm('Tem certeza que deseja <?= $u['ativo'] ? 'desativar' : 'ativar' ?> este usuário?')">
-                                    <?= $u['ativo'] ? '🚫 Desativar' : '✅ Ativar' ?>
-                                </a>
+                                <form action="/admin/usuarios/toggle/<?= $u['id'] ?>" method="POST" style="display:inline;">
+                                    <?= Csrf::field() ?>
+                                    <button type="submit" class="btn btn-toggle" onclick="return confirm('Tem certeza que deseja <?= $u['ativo'] ? 'desativar' : 'ativar' ?> este usuário?')">
+                                        <?= $u['ativo'] ? '🚫 Desativar' : '✅ Ativar' ?>
+                                    </button>
+                                </form>
                                 <a href="/admin/usuarios/confirm-delete/<?= $u['id'] ?>" 
                                    class="btn btn-delete">
                                     🗑️ Excluir
