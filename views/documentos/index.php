@@ -354,6 +354,11 @@ h1 {
                 </a>
             </li>
             <li class="nav-item">
+                <a href="/honorarios" class="nav-link">
+                    <span>💼</span> Honorários
+                </a>
+            </li>
+            <li class="nav-item">
                 <a href="/documentos" class="nav-link active">
                     <span>📄</span> Documentos
                 </a>
@@ -430,6 +435,11 @@ h1 {
                         </div>
                     </div>
 
+                    <?php if(!empty($d['cliente_nome'])): ?>
+                        <div class="documento-descricao">👤 Cliente: <?= htmlspecialchars($d['cliente_nome']) ?></div>
+                    <?php endif; ?>
+                    <div class="documento-descricao">Portal cliente: <?= !empty($d['visivel_cliente']) ? '✅ Visível' : '🚫 Privado' ?></div>
+
                     <?php if($d['descricao']): ?>
                         <div class="documento-descricao">
                             <?= nl2br(htmlspecialchars($d['descricao'])) ?>
@@ -440,11 +450,12 @@ h1 {
                         <a href="/documentos/download/<?= $d['id'] ?>" class="btn btn-small btn-download">
                             ⬇️ Baixar
                         </a>
-                        <a href="/documentos/delete/<?= $d['id'] ?>" 
-                           class="btn btn-small btn-delete" 
-                           onclick="return confirm('Tem certeza que deseja excluir este documento?')">
-                            🗑️ Excluir
-                        </a>
+                        <form action="/documentos/delete/<?= $d['id'] ?>" method="POST" style="display:inline;">
+                            <?= Csrf::field() ?>
+                            <button type="submit" class="btn btn-small btn-delete" onclick="return confirm('Tem certeza que deseja excluir este documento?')">
+                                🗑️ Excluir
+                            </button>
+                        </form>
                     </div>
                 </div>
             <?php endforeach; ?>

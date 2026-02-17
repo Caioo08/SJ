@@ -309,6 +309,16 @@ tbody tr:hover {
                 </a>
             </li>
             <li class="nav-item">
+                <a href="/prazos" class="nav-link">
+                    <span>⏳</span> Prazos
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="/honorarios" class="nav-link">
+                    <span>💼</span> Honorários
+                </a>
+            </li>
+            <li class="nav-item">
                 <a href="/documentos" class="nav-link">
                     <span>📄</span> Documentos
                 </a>
