@@ -118,6 +118,20 @@ class AuthController
         }
 
 
+
+        $perfilAcesso = $_POST['perfil_acesso'] ?? '';
+        $mapaPerfis = [
+            'admin' => 1,
+            'advogado' => 2,
+            'cliente' => 3,
+        ];
+
+        if (!array_key_exists($perfilAcesso, $mapaPerfis)) {
+            self::showError('Perfil de acesso inválido', 'Selecione o tipo de acesso para continuar.', '/login');
+            exit;
+        }
+
+
         if (empty($email) || empty($senha)) {
             self::showError('Erro de validação', 'Preencha todos os campos para continuar.', '/login');
             exit;
