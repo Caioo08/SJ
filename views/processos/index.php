@@ -7,15 +7,20 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
 <style>
 :root {
-    --bg: #0b0b0b;
-    --card: #1a1a1a;
+    --bg: #0a0a0a;
     --bg-secondary: #121212;
+    --card: #1a1a1a;
+    --card-hover: #222222;
     --primary: #f6f4ef;
     --accent: #d4af37;
+    --accent-hover: #e5c04c;
     --muted: #bfb39a;
-    --card-border: rgba(255,255,255,0.08);
-    --shadow: 0 4px 20px rgba(0,0,0,0.6);
+    --muted-dark: #8a8577;
     --border: rgba(255,255,255,0.08);
+    --shadow: 0 4px 20px rgba(0,0,0,0.4);
+    --success: #4ade80;
+    --info: #60a5fa;
+    --danger: #f87171;
 }
 
 * { box-sizing: border-box; font-family: 'Inter', sans-serif; }

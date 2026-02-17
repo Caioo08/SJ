@@ -649,11 +649,6 @@ body {
                 </a>
             </li>
             <li class="nav-item">
-                <a href="/mensagens" class="nav-link">
-                    <span>💬</span> Mensagens
-                </a>
-            </li>
-            <li class="nav-item">
                 <a href="/documentos" class="nav-link">
                     <span>📄</span> Documentos
                 </a>

@@ -12,9 +12,63 @@ body{margin:0;background:var(--bg);color:var(--txt)}.sidebar{position:fixed;left
 input,select,textarea{width:100%;padding:11px;border-radius:8px;background:#141414;border:1px solid var(--bd);color:var(--txt)}.actions{display:flex;gap:8px;margin-top:16px}.btn{background:var(--acc);color:#0b0b0b;padding:10px 14px;border-radius:8px;border:none;text-decoration:none;font-weight:700}.btn-outline{background:#222;color:var(--txt)}.meta{color:var(--mut);font-size:12px}
 @media (max-width:900px){.sidebar{transform:translateX(-100%)}.main{margin-left:0}}
 </style></head><body>
-<aside class="sidebar"><div class="logo-section"><div class="logo-container"><div class="logo">SJ</div><span class="logo-text">Sistema Jurídico</span></div></div>
-<ul class="nav-menu"><li><a href="/dashboard" class="nav-link"><span>📊</span> Dashboard</a></li><li><a href="/processos" class="nav-link"><span>⚖️</span> Processos</a></li><li><a href="/clientes" class="nav-link"><span>👥</span> Clientes</a></li><li><a href="/compromissos" class="nav-link"><span>📅</span> Compromissos</a></li><li><a href="/prazos" class="nav-link active"><span>⏳</span> Prazos</a></li><li><a href="/honorarios" class="nav-link"><span>💼</span> Honorários</a></li>
-        <li><a href="/documentos" class="nav-link"><span>📄</span> Documentos</a></li><li><a href="/configuracoes" class="nav-link"><span>⚙️</span> Configurações</a></li><li><a href="/logout" class="nav-link"><span>🚪</span> Sair</a></li></ul>
+<aside class="sidebar">
+    <div class="logo-section">
+        <div class="logo-container">
+            <div class="logo">SJ</div>
+            <span class="logo-text">Sistema Jurídico</span>
+        </div>
+    </div>
+    
+    <nav>
+        <ul class="nav-menu">
+            <li class="nav-item">
+                <a href="/dashboard" class="nav-link">
+                    <span>📊</span> Dashboard
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="/processos" class="nav-link">
+                    <span>⚖️</span> Processos
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="/clientes" class="nav-link">
+                    <span>👥</span> Clientes
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="/compromissos" class="nav-link">
+                    <span>📅</span> Compromissos
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="/prazos" class="nav-link active">
+                    <span>⏳</span> Prazos
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="/honorarios" class="nav-link">
+                    <span>💼</span> Honorários
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="/documentos" class="nav-link">
+                    <span>📄</span> Documentos
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="/configuracoes" class="nav-link">
+                    <span>⚙️</span> Configurações
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="/logout" class="nav-link">
+                    <span>🚪</span> Sair
+                </a>
+            </li>
+        </ul>
+    </nav>
 </aside>
 <main class="main"><div class="wrap"><h1>✏️ Editar Prazo</h1>
 <form action="/prazos/update/<?= $prazo['id'] ?>" method="POST">
