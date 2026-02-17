@@ -201,6 +201,7 @@ a.btn:hover {
     <div class="card">
         <h1>✏️ Editar Processo</h1>
         <form action="/processos/update/<?= $processo['id'] ?>" method="POST">
+            <?= Csrf::field() ?>
             
             <!-- Cliente -->
             <div class="form-section">
