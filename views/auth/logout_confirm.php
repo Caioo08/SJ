@@ -1,3 +1,13 @@
+<?php
+$cancelarUrl = '/login';
+if (isset($_SESSION['perfil_id']) && (int) $_SESSION['perfil_id'] === 1) {
+    $cancelarUrl = '/admin';
+} elseif (isset($_SESSION['perfil_id']) && (int) $_SESSION['perfil_id'] === 2) {
+    $cancelarUrl = '/dashboard';
+} elseif (isset($_SESSION['perfil_id']) && (int) $_SESSION['perfil_id'] === 3) {
+    $cancelarUrl = '/cliente';
+}
+?>
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -23,7 +33,7 @@ h1{margin:0 0 10px;color:var(--acc)}p{margin:0 0 16px;color:var(--mut)}
                 <?= Csrf::field() ?>
                 <button type="submit" class="btn btn-primary">Sair agora</button>
             </form>
-            <a class="btn btn-secondary" href="javascript:history.back()">Cancelar</a>
+            <a class="btn btn-secondary" href="<?= htmlspecialchars($cancelarUrl, ENT_QUOTES, 'UTF-8') ?>">Cancelar</a>
         </div>
     </div>
 </body>

@@ -107,11 +107,13 @@ class AuthController
                 exit;
             }
 
+            session_regenerate_id(true);
+            unset($_SESSION['usuario_id'], $_SESSION['usuario_nome']);
+
             $_SESSION['cliente_id'] = $cliente['id'];
             $_SESSION['cliente_nome'] = $cliente['nome'];
             $_SESSION['cliente_advogado'] = $cliente['advogado_nome'] ?? null;
             $_SESSION['perfil_id'] = 3;
-            $_SESSION['usuario_id'] = null;
 
             Audit::registrar('Login cliente', 'clientes', (int) $cliente['id'], 'Email: ' . $email);
 
@@ -155,6 +157,9 @@ class AuthController
         }
 
         // ✅ CORREÇÃO: Armazenar perfil_id na sessão
+        session_regenerate_id(true);
+        unset($_SESSION['cliente_id'], $_SESSION['cliente_nome'], $_SESSION['cliente_advogado']);
+
         $_SESSION['usuario_id'] = $usuario['id'];
         $_SESSION['usuario_nome'] = $usuario['nome'];
         $_SESSION['perfil_id'] = $usuario['perfil_id']; // ← ADICIONADO
