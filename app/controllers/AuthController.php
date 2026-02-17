@@ -1,6 +1,7 @@
 <?php
 
 require_once '../config/database.php';
+require_once '../app/helpers/Audit.php';
 
 
 class AuthController
@@ -8,6 +9,12 @@ class AuthController
     
     public static function loginForm()
     {
+        $acessoSelecionado = $_GET['acesso'] ?? 'advogado';
+        $acessosPermitidos = ['admin', 'advogado', 'cliente'];
+        if (!in_array($acessoSelecionado, $acessosPermitidos, true)) {
+            $acessoSelecionado = 'advogado';
+        }
+
         require_once '../views/auth/login.php';
     }
 
@@ -65,8 +72,52 @@ class AuthController
         $email = $_POST['email'] ?? '';
         $senha = $_POST['senha'] ?? '';
 
+
+        $perfilAcesso = $_POST['perfil_acesso'] ?? '';
+        $mapaPerfis = [
+            'admin' => 1,
+            'advogado' => 2,
+            'cliente' => 3,
+        ];
+
+        if (!array_key_exists($perfilAcesso, $mapaPerfis)) {
+            self::showError('Perfil de acesso inválido', 'Selecione o tipo de acesso para continuar.', '/login');
+            exit;
+        }
+
+
         if (empty($email) || empty($senha)) {
             self::showError('Erro de validação', 'Preencha todos os campos para continuar.', '/login');
+            exit;
+        }
+
+        if ($perfilAcesso === 'cliente') {
+            $stmt = $pdo->prepare("SELECT c.*, u.nome AS advogado_nome FROM clientes c LEFT JOIN usuarios u ON c.usuario_id = u.id WHERE c.email = ? LIMIT 2");
+            $stmt->execute([$email]);
+            $clientes = $stmt->fetchAll();
+
+            if (count($clientes) !== 1) {
+                self::showError('Acesso de cliente indisponível', 'Não foi possível identificar uma conta de cliente única com este email. Contate seu advogado.', '/login?acesso=cliente', 'warning');
+                exit;
+            }
+
+            $cliente = $clientes[0];
+            if (empty($cliente['senha_hash']) || !password_verify($senha, $cliente['senha_hash'])) {
+                self::showError('Credenciais inválidas', 'Email ou senha do cliente incorretos.', '/login?acesso=cliente');
+                exit;
+            }
+
+            session_regenerate_id(true);
+            unset($_SESSION['usuario_id'], $_SESSION['usuario_nome']);
+
+            $_SESSION['cliente_id'] = $cliente['id'];
+            $_SESSION['cliente_nome'] = $cliente['nome'];
+            $_SESSION['cliente_advogado'] = $cliente['advogado_nome'] ?? null;
+            $_SESSION['perfil_id'] = 3;
+
+            Audit::registrar('Login cliente', 'clientes', (int) $cliente['id'], 'Email: ' . $email);
+
+            header('Location: /cliente');
             exit;
         }
 
@@ -83,6 +134,17 @@ class AuthController
             exit;
         }
 
+
+        if ((int)$usuario['perfil_id'] !== (int)$mapaPerfis[$perfilAcesso]) {
+            self::showError(
+                'Perfil incorreto',
+                'O perfil selecionado não corresponde a este usuário. Verifique se você escolheu Admin ou Advogado corretamente.',
+                '/login?acesso=' . urlencode($perfilAcesso),
+                'warning'
+            );
+            exit;
+        }
+
         // Verificar se o usuário está ativo
         if (!$usuario['ativo']) {
             self::showError(
@@ -95,9 +157,14 @@ class AuthController
         }
 
         // ✅ CORREÇÃO: Armazenar perfil_id na sessão
+        session_regenerate_id(true);
+        unset($_SESSION['cliente_id'], $_SESSION['cliente_nome'], $_SESSION['cliente_advogado']);
+
         $_SESSION['usuario_id'] = $usuario['id'];
         $_SESSION['usuario_nome'] = $usuario['nome'];
         $_SESSION['perfil_id'] = $usuario['perfil_id']; // ← ADICIONADO
+
+        Audit::registrar('Login usuário', 'usuarios', (int) $usuario['id'], 'Perfil: ' . (int) $usuario['perfil_id']);
 
         // Redirecionar baseado no perfil
         if ($usuario['perfil_id'] == 1) {
