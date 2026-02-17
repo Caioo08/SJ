@@ -4,6 +4,7 @@ require_once '../app/controllers/AuthController.php';
 require_once '../app/helpers/AuthMiddleware.php';
 require_once '../app/helpers/Audit.php';
 require_once '../app/controllers/FaseCController.php';
+require_once '../app/controllers/HonorariosController.php';
 
 $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $method = $_SERVER['REQUEST_METHOD'];
@@ -444,6 +445,36 @@ elseif (preg_match('#^/prazos/delete/(\d+)$#', $uri, $matches) && $method === 'P
 }
 
 // ==================== CONFIGURAÇÕES (APENAS ADVOGADOS) ====================
+
+
+// ==================== HONORÁRIOS (APENAS ADVOGADOS) ====================
+
+elseif ($uri === '/honorarios' && $method === 'GET') {
+    AuthMiddleware::verificarAdvogado();
+    HonorariosController::index();
+}
+
+elseif ($uri === '/honorarios/novo' && $method === 'GET') {
+    AuthMiddleware::verificarAdvogado();
+    HonorariosController::create();
+}
+
+elseif ($uri === '/honorarios/store' && $method === 'POST') {
+    AuthMiddleware::verificarAdvogado();
+    HonorariosController::store();
+}
+
+elseif (preg_match('#^/honorarios/toggle/(\d+)$#', $uri, $matches) && $method === 'POST') {
+    AuthMiddleware::verificarAdvogado();
+    $id = $matches[1];
+    HonorariosController::toggleStatus($id);
+}
+
+elseif (preg_match('#^/honorarios/delete/(\d+)$#', $uri, $matches) && $method === 'POST') {
+    AuthMiddleware::verificarAdvogado();
+    $id = $matches[1];
+    HonorariosController::delete($id);
+}
 
 elseif ($uri === '/configuracoes') {
     AuthMiddleware::verificarAdvogado();

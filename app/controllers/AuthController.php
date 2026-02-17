@@ -2,6 +2,7 @@
 
 require_once '../config/database.php';
 require_once '../app/helpers/Audit.php';
+require_once '../app/helpers/Csrf.php';
 
 
 class AuthController
@@ -140,6 +141,7 @@ class AuthController
             }
 
             session_regenerate_id(true);
+            Csrf::rotateToken();
             unset($_SESSION['usuario_id'], $_SESSION['usuario_nome']);
 
             $_SESSION['cliente_id'] = $cliente['id'];
@@ -190,6 +192,7 @@ class AuthController
 
         // ✅ CORREÇÃO: Armazenar perfil_id na sessão
         session_regenerate_id(true);
+        Csrf::rotateToken();
         unset($_SESSION['cliente_id'], $_SESSION['cliente_nome'], $_SESSION['cliente_advogado']);
 
         $_SESSION['usuario_id'] = $usuario['id'];

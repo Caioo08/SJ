@@ -409,3 +409,34 @@ CREATE TABLE logs_auditoria (
 -- ============================================
 SHOW TABLES;
 SELECT 'Banco de dados criado com sucesso!' AS status;
+
+-- ============================================
+-- TABELA: Honorários e Contratos (Fase D)
+-- ============================================
+CREATE TABLE honorarios_contratos (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    usuario_id INT NOT NULL,
+    cliente_id INT NOT NULL,
+    processo_id INT,
+    descricao VARCHAR(190) NOT NULL,
+    tipo_honorario ENUM('fixo','exito') NOT NULL DEFAULT 'fixo',
+    valor DECIMAL(12,2) NOT NULL,
+    status_pagamento ENUM('pendente','parcial','pago','cancelado') NOT NULL DEFAULT 'pendente',
+    observacoes TEXT,
+    criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    atualizado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_honorarios_usuario
+        FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE,
+
+    CONSTRAINT fk_honorarios_cliente
+        FOREIGN KEY (cliente_id) REFERENCES clientes(id) ON DELETE CASCADE,
+
+    CONSTRAINT fk_honorarios_processo
+        FOREIGN KEY (processo_id) REFERENCES processos(id) ON DELETE SET NULL,
+
+    INDEX idx_honorarios_usuario (usuario_id),
+    INDEX idx_honorarios_cliente (cliente_id),
+    INDEX idx_honorarios_status (status_pagamento),
+    INDEX idx_honorarios_criado (criado_em)
+) ENGINE=InnoDB;

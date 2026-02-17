@@ -11,6 +11,12 @@ class Csrf
         return $_SESSION['csrf_token'];
     }
 
+
+    public static function rotateToken(): void
+    {
+        $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+    }
+
     public static function field(): string
     {
         $token = htmlspecialchars(self::token(), ENT_QUOTES, 'UTF-8');
