@@ -35,6 +35,7 @@ input,select{padding:10px;border-radius:8px;border:1px solid var(--bd);backgroun
         <li><a href="/clientes" class="nav-link"><span>👥</span> Clientes</a></li>
         <li><a href="/compromissos" class="nav-link"><span>📅</span> Compromissos</a></li>
         <li><a href="/prazos" class="nav-link active"><span>⏳</span> Prazos</a></li>
+        <li><a href="/honorarios" class="nav-link"><span>💼</span> Honorários</a></li>
         <li><a href="/documentos" class="nav-link"><span>📄</span> Documentos</a></li>
         <li><a href="/configuracoes" class="nav-link"><span>⚙️</span> Configurações</a></li>
         <li><a href="/logout" class="nav-link"><span>🚪</span> Sair</a></li>

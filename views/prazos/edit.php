@@ -13,7 +13,8 @@ input,select,textarea{width:100%;padding:11px;border-radius:8px;background:#1414
 @media (max-width:900px){.sidebar{transform:translateX(-100%)}.main{margin-left:0}}
 </style></head><body>
 <aside class="sidebar"><div class="logo-section"><div class="logo-container"><div class="logo">SJ</div><span class="logo-text">Sistema Jurídico</span></div></div>
-<ul class="nav-menu"><li><a href="/dashboard" class="nav-link"><span>📊</span> Dashboard</a></li><li><a href="/processos" class="nav-link"><span>⚖️</span> Processos</a></li><li><a href="/clientes" class="nav-link"><span>👥</span> Clientes</a></li><li><a href="/compromissos" class="nav-link"><span>📅</span> Compromissos</a></li><li><a href="/prazos" class="nav-link active"><span>⏳</span> Prazos</a></li><li><a href="/documentos" class="nav-link"><span>📄</span> Documentos</a></li><li><a href="/configuracoes" class="nav-link"><span>⚙️</span> Configurações</a></li><li><a href="/logout" class="nav-link"><span>🚪</span> Sair</a></li></ul>
+<ul class="nav-menu"><li><a href="/dashboard" class="nav-link"><span>📊</span> Dashboard</a></li><li><a href="/processos" class="nav-link"><span>⚖️</span> Processos</a></li><li><a href="/clientes" class="nav-link"><span>👥</span> Clientes</a></li><li><a href="/compromissos" class="nav-link"><span>📅</span> Compromissos</a></li><li><a href="/prazos" class="nav-link active"><span>⏳</span> Prazos</a></li><li><a href="/honorarios" class="nav-link"><span>💼</span> Honorários</a></li>
+        <li><a href="/documentos" class="nav-link"><span>📄</span> Documentos</a></li><li><a href="/configuracoes" class="nav-link"><span>⚙️</span> Configurações</a></li><li><a href="/logout" class="nav-link"><span>🚪</span> Sair</a></li></ul>
 </aside>
 <main class="main"><div class="wrap"><h1>✏️ Editar Prazo</h1>
 <form action="/prazos/update/<?= $prazo['id'] ?>" method="POST">

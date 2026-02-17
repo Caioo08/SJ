@@ -354,8 +354,8 @@ h1 {
                 </a>
             </li>
             <li class="nav-item">
-                <a href="/prazos" class="nav-link">
-                    <span>⏳</span> Prazos
+                <a href="/honorarios" class="nav-link">
+                    <span>💼</span> Honorários
                 </a>
             </li>
             <li class="nav-item">

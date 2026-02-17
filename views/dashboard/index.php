@@ -644,6 +644,11 @@ body {
                 </a>
             </li>
             <li class="nav-item">
+                <a href="/honorarios" class="nav-link">
+                    <span>💼</span> Honorários
+                </a>
+            </li>
+            <li class="nav-item">
                 <a href="/mensagens" class="nav-link">
                     <span>💬</span> Mensagens
                 </a>

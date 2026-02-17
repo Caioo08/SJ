@@ -26,6 +26,7 @@ label{display:block;font-size:13px;color:var(--mut);margin:12px 0 6px}input,sele
         <li><a href="/clientes" class="nav-link"><span>👥</span> Clientes</a></li>
         <li><a href="/compromissos" class="nav-link"><span>📅</span> Compromissos</a></li>
         <li><a href="/prazos" class="nav-link active"><span>⏳</span> Prazos</a></li>
+        <li><a href="/honorarios" class="nav-link"><span>💼</span> Honorários</a></li>
         <li><a href="/documentos" class="nav-link"><span>📄</span> Documentos</a></li>
         <li><a href="/configuracoes" class="nav-link"><span>⚙️</span> Configurações</a></li>
         <li><a href="/logout" class="nav-link"><span>🚪</span> Sair</a></li>
