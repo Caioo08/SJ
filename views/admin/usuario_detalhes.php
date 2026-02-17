@@ -355,11 +355,12 @@ h1 {
         <h1>👤 Detalhes do Usuário</h1>
         <div class="btn-group">
             <a href="/admin/usuarios" class="btn btn-back">← Voltar</a>
-            <a href="/admin/usuarios/toggle/<?= $usuario['id'] ?>" 
-               class="btn btn-toggle"
-               onclick="return confirm('Deseja <?= $usuario['ativo'] ? 'desativar' : 'ativar' ?> este usuário?')">
-                <?= $usuario['ativo'] ? '🚫 Desativar' : '✅ Ativar' ?>
-            </a>
+            <form action="/admin/usuarios/toggle/<?= $usuario['id'] ?>" method="POST" style="display:inline;">
+                <?= Csrf::field() ?>
+                <button type="submit" class="btn btn-toggle" onclick="return confirm('Deseja <?= $usuario['ativo'] ? 'desativar' : 'ativar' ?> este usuário?')">
+                    <?= $usuario['ativo'] ? '🚫 Desativar' : '✅ Ativar' ?>
+                </button>
+            </form>
             <a href="/admin/usuarios/confirm-delete/<?= $usuario['id'] ?>" class="btn btn-delete">
                 🗑️ Excluir
             </a>

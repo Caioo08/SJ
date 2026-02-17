@@ -402,6 +402,16 @@ select option {
                 </a>
             </li>
             <li class="nav-item">
+                <a href="/prazos" class="nav-link">
+                    <span>⏳</span> Prazos
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="/honorarios" class="nav-link">
+                    <span>💼</span> Honorários
+                </a>
+            </li>
+            <li class="nav-item">
                 <a href="/documentos" class="nav-link">
                     <span>📄</span> Documentos
                 </a>
@@ -485,6 +495,7 @@ select option {
             </div>
 
             <form action="/configuracoes/atualizar-perfil" method="POST">
+            <?= Csrf::field() ?>
                 <div class="form-grid">
                     <div class="form-group full-width">
                         <label for="nome">Nome Completo</label>
@@ -530,6 +541,7 @@ select option {
     </div>
 
     <form action="/configuracoes/atualizar-escritorio" method="POST">
+            <?= Csrf::field() ?>
         <div class="form-grid">
             <div class="form-group cep-group" style="position: relative;">
                 <label for="escritorio_cep">CEP</label>
@@ -604,6 +616,7 @@ select option {
             </div>
 
             <form action="/configuracoes/alterar-senha" method="POST">
+            <?= Csrf::field() ?>
                 <div class="form-grid">
                     <div class="form-group full-width">
                         <label for="senha_atual">Senha Atual</label>
@@ -661,6 +674,7 @@ select option {
         </p>
         
         <form action="/configuracoes/excluir-conta" method="POST">
+            <?= Csrf::field() ?>
             <div class="form-group">
                 <label for="confirmacao">Digite <strong>EXCLUIR</strong> para confirmar:</label>
                 <input type="text" id="confirmacao" name="confirmacao" placeholder="EXCLUIR" required>

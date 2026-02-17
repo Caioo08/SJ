@@ -157,6 +157,7 @@ a.btn:hover {
 <h1>✏️ Editar Cliente</h1>
 
 <form action="/clientes/update/<?= $cliente['id'] ?>" method="POST">
+            <?= Csrf::field() ?>
 
 <!-- Dados Pessoais -->
 <div class="form-section">
@@ -216,6 +217,13 @@ a.btn:hover {
 <div class="form-group">
 <label>Telefone</label>
 <input type="text" id="telefone" name="telefone" value="<?= htmlspecialchars($cliente['telefone'] ?? '') ?>">
+</div>
+</div>
+
+<div class="form-row">
+<div class="form-group">
+<label>Redefinir senha de acesso do cliente (opcional)</label>
+<input type="password" name="senha_portal" placeholder="Preencha apenas para alterar a senha do portal">
 </div>
 </div>
 </div>

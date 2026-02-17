@@ -1,4 +1,3 @@
-<?php session_start(); ?>
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -21,7 +20,9 @@
     --shadow: 0 4px 20px rgba(0,0,0,0.4);
     --success: #4ade80;
     --info: #60a5fa;
+    --danger: #f87171;
 }
+
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -369,6 +370,19 @@ body {
     background: #0b0b0b;
 }
 
+.calendar-day.has-deadline {
+    box-shadow: inset 0 0 0 2px rgba(239, 68, 68, 0.7);
+}
+
+.calendar-day.has-deadline::before {
+    content: '⚠';
+    position: absolute;
+    top: 2px;
+    right: 4px;
+    color: #f87171;
+    font-size: 10px;
+}
+
 /* Appointments Section */
 .appointments-section {
     background: var(--card);
@@ -433,6 +447,77 @@ body {
     margin-bottom: 12px;
     opacity: 0.5;
 }
+
+
+
+.filter-bar {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 24px;
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    align-items:flex-end;
+}
+
+.filter-group { display:flex; flex-direction:column; gap:6px; }
+.filter-group label { font-size:12px; color: var(--muted); }
+.filter-group select,
+.filter-group input {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    color: var(--primary);
+    border-radius: 8px;
+    padding: 8px 10px;
+}
+
+.btn-filter {
+    background: var(--accent);
+    color: #0b0b0b;
+    border: none;
+    border-radius: 8px;
+    padding: 9px 14px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.management-grid {
+    display:grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap:16px;
+    margin-bottom:24px;
+}
+
+.management-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px;
+}
+
+.management-card h3 {
+    margin: 0 0 12px;
+    font-size: 15px;
+    color: var(--accent);
+}
+
+.metric-row {
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    border-top:1px solid var(--border);
+    padding:8px 0;
+    font-size:14px;
+}
+
+.metric-row:first-of-type { border-top:none; }
+.metric-value { font-weight:700; }
+
+.ranking-table { width:100%; border-collapse:collapse; margin-top:10px; }
+.ranking-table th, .ranking-table td { border-bottom:1px solid var(--border); padding:8px; text-align:left; font-size:13px; }
+.ranking-table th { color: var(--muted); font-weight:600; }
 
 /* Personal Info Section */
 .info-section {
@@ -554,6 +639,21 @@ body {
                 </a>
             </li>
             <li class="nav-item">
+                <a href="/prazos" class="nav-link">
+                    <span>⏳</span> Prazos
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="/honorarios" class="nav-link">
+                    <span>💼</span> Honorários
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="/mensagens" class="nav-link">
+                    <span>💬</span> Mensagens
+                </a>
+            </li>
+            <li class="nav-item">
                 <a href="/documentos" class="nav-link">
                     <span>📄</span> Documentos
                 </a>
@@ -622,7 +722,87 @@ body {
                 <div class="stat-icon">📅</div>
             </div>
         </div>
+
+        <div class="stat-card">
+            <div class="stat-header">
+                <div>
+                    <div class="stat-value"><?= $total_prazos_abertos ?></div>
+                    <div class="stat-label">Prazos Abertos</div>
+                </div>
+                <div class="stat-icon">🚨</div>
+            </div>
+        </div>
     </div>
+
+
+    <form method="GET" class="filter-bar">
+        <div class="filter-group">
+            <label for="periodo">Período</label>
+            <select id="periodo" name="periodo">
+                <option value="7d" <?= $filtro_periodo === '7d' ? 'selected' : '' ?>>Últimos 7 dias</option>
+                <option value="30d" <?= $filtro_periodo === '30d' ? 'selected' : '' ?>>Últimos 30 dias</option>
+                <option value="90d" <?= $filtro_periodo === '90d' ? 'selected' : '' ?>>Últimos 90 dias</option>
+                <option value="mes" <?= $filtro_periodo === 'mes' ? 'selected' : '' ?>>Mês atual</option>
+                <option value="ano" <?= $filtro_periodo === 'ano' ? 'selected' : '' ?>>Ano atual</option>
+                <option value="custom" <?= $filtro_periodo === 'custom' ? 'selected' : '' ?>>Personalizado</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label for="de">De</label>
+            <input id="de" type="date" name="de" value="<?= htmlspecialchars($_GET['de'] ?? '') ?>">
+        </div>
+        <div class="filter-group">
+            <label for="ate">Até</label>
+            <input id="ate" type="date" name="ate" value="<?= htmlspecialchars($_GET['ate'] ?? '') ?>">
+        </div>
+        <button class="btn-filter" type="submit">Aplicar filtros</button>
+        <span style="font-size:12px;color:var(--muted)">Recorte ativo: <?= htmlspecialchars($filtro_rotulo) ?></span>
+    </form>
+
+    <section class="info-section" style="margin-top:0;">
+        <div class="section-header">
+            <h2 class="section-title">Indicadores Gerenciais</h2>
+        </div>
+        <div class="management-grid">
+            <article class="management-card">
+                <h3>Prazos no período</h3>
+                <div class="metric-row"><span>No prazo</span><span class="metric-value" style="color:var(--success)"><?= (int)$prazos_periodo['no_prazo'] ?></span></div>
+                <div class="metric-row"><span>Atrasados</span><span class="metric-value" style="color:var(--danger)"><?= (int)$prazos_periodo['atrasados'] ?></span></div>
+                <div class="metric-row"><span>Total monitorado</span><span class="metric-value"><?= (int)$prazos_periodo['total'] ?></span></div>
+            </article>
+
+            <article class="management-card">
+                <h3>Processos por status</h3>
+                <div class="metric-row"><span>Abertos</span><span class="metric-value"><?= (int)$processos_por_status['aberto'] ?></span></div>
+                <div class="metric-row"><span>Concluídos</span><span class="metric-value"><?= (int)$processos_por_status['concluido'] ?></span></div>
+                <div class="metric-row"><span>Arquivados</span><span class="metric-value"><?= (int)$processos_por_status['arquivado'] ?></span></div>
+            </article>
+        </div>
+
+        <h3 style="font-size:15px;color:var(--accent);margin:4px 0 8px;">Ranking de clientes por volume</h3>
+        <?php if (empty($ranking_clientes)): ?>
+            <p class="mut">Sem dados de clientes no período selecionado.</p>
+        <?php else: ?>
+            <table class="ranking-table">
+                <thead>
+                    <tr>
+                        <th>Cliente</th>
+                        <th>Processos</th>
+                        <th>Abertos</th>
+                    </tr>
+                </thead>
+                <tbody>
+                <?php foreach ($ranking_clientes as $linha): ?>
+                    <tr>
+                        <td><?= htmlspecialchars($linha['nome']) ?></td>
+                        <td><?= (int)$linha['total_processos'] ?></td>
+                        <td><strong><?= (int)$linha['processos_abertos'] ?></strong></td>
+                    </tr>
+                <?php endforeach; ?>
+                </tbody>
+            </table>
+        <?php endif; ?>
+    </section>
 
     <!-- Personal Info -->
     <section class="info-section">
@@ -647,6 +827,32 @@ body {
                 <span class="info-value"><?= htmlspecialchars($usuario['uf']) ?></span>
             </div>
         </div>
+    </section>
+
+    <section class="info-section">
+        <div class="section-header">
+            <h2 class="section-title">Alertas de Prazo</h2>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
+            <span style="padding:4px 10px;border-radius:999px;background:rgba(74,158,255,.2);color:#4a9eff;font-size:12px;font-weight:700;">D-7: <?= (int)($alertas_prazos['d7'] ?? 0) ?></span>
+            <span style="padding:4px 10px;border-radius:999px;background:rgba(212,175,55,.2);color:#d4af37;font-size:12px;font-weight:700;">D-3: <?= (int)($alertas_prazos['d3'] ?? 0) ?></span>
+            <span style="padding:4px 10px;border-radius:999px;background:rgba(249,115,22,.2);color:#fb923c;font-size:12px;font-weight:700;">D-1: <?= (int)($alertas_prazos['d1'] ?? 0) ?></span>
+            <span style="padding:4px 10px;border-radius:999px;background:rgba(239,68,68,.2);color:#ef4444;font-size:12px;font-weight:700;">Vencidos: <?= (int)($alertas_prazos['vencidos'] ?? 0) ?></span>
+            <span style="padding:4px 10px;border-radius:999px;background:rgba(74,222,128,.2);color:#4ade80;font-size:12px;font-weight:700;">Em dia: <?= (int)($alertas_prazos['em_dia'] ?? 0) ?></span>
+        </div>
+        <?php if(empty($prazos_criticos)): ?>
+            <div class="empty-state" style="padding:20px;">✅ Nenhum prazo crítico nos próximos 7 dias.</div>
+        <?php else: ?>
+            <div class="appointments-list">
+                <?php foreach($prazos_criticos as $p): ?>
+                    <div class="appointment-card" style="border-left-color: var(--danger);">
+                        <div class="appointment-time">⏰ <?= date('d/m/Y H:i', strtotime($p['data_limite'])) ?></div>
+                        <div class="appointment-title"><?= htmlspecialchars($p['titulo']) ?></div>
+                        <div class="appointment-location">Prioridade: <?= strtoupper(htmlspecialchars($p['prioridade'])) ?> · Alerta: <?= htmlspecialchars($p['faixa_alerta']) ?></div>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+        <?php endif; ?>
     </section>
 
     <!-- Dashboard Grid -->
@@ -686,6 +892,10 @@ body {
         <section class="calendar-section">
             <div class="section-header">
                 <h2 class="section-title">Calendário</h2>
+                <div style="display:flex;gap:10px;align-items:center;font-size:12px;color:var(--muted);">
+                    <span style="display:inline-flex;align-items:center;gap:4px;"><span style="color:var(--accent);font-size:16px;">•</span>Compromissos</span>
+                    <span style="display:inline-flex;align-items:center;gap:4px;"><span style="color:#f87171;">⚠</span>Prazos</span>
+                </div>
             </div>
             <div class="calendar">
                 <div class="calendar-header">
@@ -726,9 +936,22 @@ updateDateTime();
 setInterval(updateDateTime, 60000);
 
 // Calendar functionality
-const compromissos = <?= json_encode(array_map(function($c) {
+const compromissos = <?= json_encode(array_values(array_unique(array_map(function($c) {
     return date('Y-m-d', strtotime($c['data_inicio']));
-}, $compromissos)) ?>;
+}, $compromissos)))) ?>;
+const prazos = <?= json_encode(array_values(array_unique(array_filter(array_map(function($p) {
+    $raw = (string)($p['data_limite'] ?? '');
+    if ($raw === '') {
+        return null;
+    }
+
+    if (preg_match('/^\d{4}-\d{2}-\d{2}/', $raw, $m)) {
+        return $m[0];
+    }
+
+    $ts = strtotime($raw);
+    return $ts ? date('Y-m-d', $ts) : null;
+}, $prazos_calendario))))) ?>;
 
 let currentDate = new Date();
 
@@ -774,6 +997,10 @@ function renderCalendar() {
         
         if (compromissos.includes(dateStr)) {
             dayEl.classList.add('has-event');
+        }
+
+        if (prazos.includes(dateStr)) {
+            dayEl.classList.add('has-deadline');
         }
         
         calendarDays.appendChild(dayEl);
