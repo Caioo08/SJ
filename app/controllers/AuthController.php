@@ -62,7 +62,7 @@ class AuthController
             exit;
         }
 
-        $stmt = $pdo->prepare("SELECT id FROM usuarios WHERE email = ? LIMIT 1");
+        $stmt = $pdo->prepare("SELECT id FROM usuarios WHERE LOWER(email) = ? LIMIT 1");
         $stmt->execute([$email]);
         if ($stmt->fetch()) {
             self::showError('Email já cadastrado', 'Já existe um usuário com este email.', '/register', 'warning');
@@ -118,27 +118,13 @@ class AuthController
         }
 
 
-
-        $perfilAcesso = $_POST['perfil_acesso'] ?? '';
-        $mapaPerfis = [
-            'admin' => 1,
-            'advogado' => 2,
-            'cliente' => 3,
-        ];
-
-        if (!array_key_exists($perfilAcesso, $mapaPerfis)) {
-            self::showError('Perfil de acesso inválido', 'Selecione o tipo de acesso para continuar.', '/login');
-            exit;
-        }
-
-
         if (empty($email) || empty($senha)) {
             self::showError('Erro de validação', 'Preencha todos os campos para continuar.', '/login');
             exit;
         }
 
         if ($perfilAcesso === 'cliente') {
-            $stmt = $pdo->prepare("SELECT c.*, u.nome AS advogado_nome FROM clientes c LEFT JOIN usuarios u ON c.usuario_id = u.id WHERE c.email = ? LIMIT 2");
+            $stmt = $pdo->prepare("SELECT c.*, u.nome AS advogado_nome FROM clientes c LEFT JOIN usuarios u ON c.usuario_id = u.id WHERE LOWER(c.email) = ? LIMIT 2");
             $stmt->execute([$email]);
             $clientes = $stmt->fetchAll();
 
@@ -167,7 +153,7 @@ class AuthController
             exit;
         }
 
-        $stmt = $pdo->prepare("SELECT * FROM usuarios WHERE email = ?");
+        $stmt = $pdo->prepare("SELECT * FROM usuarios WHERE LOWER(email) = ?");
         $stmt->execute([$email]);
         $usuario = $stmt->fetch();
 
