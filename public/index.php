@@ -1,5 +1,17 @@
 <?php
+$httpsAtivo = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+    || (isset($_SERVER['SERVER_PORT']) && (int) $_SERVER['SERVER_PORT'] === 443);
+
+ini_set('session.cookie_httponly', '1');
+ini_set('session.cookie_secure', $httpsAtivo ? '1' : '0');
+ini_set('session.cookie_samesite', 'Lax');
+
 session_start();
+
+header('X-Frame-Options: SAMEORIGIN');
+header('X-Content-Type-Options: nosniff');
+header('Referrer-Policy: strict-origin-when-cross-origin');
+header("Content-Security-Policy: frame-ancestors 'self'");
 
 require_once '../app/helpers/Csrf.php';
 
