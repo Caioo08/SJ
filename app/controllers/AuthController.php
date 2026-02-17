@@ -34,11 +34,33 @@ class AuthController
     {
         global $pdo;
 
-        $nome   = $_POST['nome'];
-        $email  = $_POST['email'];
-        $senha  = $_POST['senha'];
-        $oab    = $_POST['oab'];
-        $ufOab  = strtoupper($_POST['uf_id']);
+        $nome = trim((string) ($_POST['nome'] ?? ''));
+        $email = strtolower(trim((string) ($_POST['email'] ?? '')));
+        $senha = (string) ($_POST['senha'] ?? '');
+        $oab = trim((string) ($_POST['oab'] ?? ''));
+        $ufOab = trim((string) ($_POST['uf_id'] ?? ''));
+
+        if ($nome === '' || $email === '' || $senha === '' || $oab === '' || $ufOab === '') {
+            self::showError('Erro de validação', 'Preencha todos os campos para concluir o cadastro.', '/register', 'warning');
+            exit;
+        }
+
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            self::showError('Email inválido', 'Informe um endereço de email válido.', '/register', 'warning');
+            exit;
+        }
+
+        if (strlen($senha) < 8) {
+            self::showError('Senha fraca', 'A senha deve ter pelo menos 8 caracteres.', '/register', 'warning');
+            exit;
+        }
+
+        $stmt = $pdo->prepare("SELECT id FROM usuarios WHERE email = ? LIMIT 1");
+        $stmt->execute([$email]);
+        if ($stmt->fetch()) {
+            self::showError('Email já cadastrado', 'Já existe um usuário com este email.', '/register', 'warning');
+            exit;
+        }
 
         // Hash da senha
         $senhaHash = password_hash($senha, PASSWORD_DEFAULT);
@@ -57,11 +79,14 @@ class AuthController
                 ':uf'    => $ufOab
             ]);
 
+            Audit::registrar('Cadastro usuário', 'usuarios', (int) $pdo->lastInsertId(), 'Email: ' . $email);
+
             header('Location: /login');
             exit;
 
         } catch (PDOException $e) {
-            echo "Erro ao cadastrar: " . $e->getMessage();
+            self::showError('Falha no cadastro', 'Não foi possível concluir o cadastro no momento.', '/register');
+            exit;
         }
     }
 
