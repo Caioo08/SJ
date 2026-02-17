@@ -499,9 +499,22 @@ elseif ($uri === '/cliente/mensagens/enviar' && $method === 'POST') {
 
 // ==================== LOGOUT ====================
 
-elseif ($uri === '/logout') {
+elseif ($uri === '/logout' && $method === 'GET') {
+    if (!isset($_SESSION['usuario_id']) && !isset($_SESSION['cliente_id'])) {
+        header('Location: /login');
+        exit;
+    }
+
+    require_once '../views/auth/logout_confirm.php';
+}
+
+elseif ($uri === '/logout' && $method === 'POST') {
     if (isset($_SESSION['usuario_id']) && !empty($_SESSION['usuario_id'])) {
         Audit::registrar('Logout usuário', 'usuarios', (int) $_SESSION['usuario_id'], null);
+    }
+
+    if (isset($_SESSION['cliente_id']) && !empty($_SESSION['cliente_id'])) {
+        Audit::registrar('Logout cliente', 'clientes', (int) $_SESSION['cliente_id'], null);
     }
 
     $_SESSION = [];
