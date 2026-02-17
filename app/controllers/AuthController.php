@@ -38,10 +38,17 @@ class AuthController
         $email = strtolower(trim((string) ($_POST['email'] ?? '')));
         $senha = (string) ($_POST['senha'] ?? '');
         $oab = trim((string) ($_POST['oab'] ?? ''));
-        $ufOab = trim((string) ($_POST['uf_id'] ?? ''));
+        $ufOab = (int) ($_POST['uf_id'] ?? 0);
 
-        if ($nome === '' || $email === '' || $senha === '' || $oab === '' || $ufOab === '') {
+        if ($nome === '' || $email === '' || $senha === '' || $oab === '' || $ufOab <= 0) {
             self::showError('Erro de validação', 'Preencha todos os campos para concluir o cadastro.', '/register', 'warning');
+            exit;
+        }
+
+        $stmt = $pdo->prepare("SELECT id FROM ufs WHERE id = ? LIMIT 1");
+        $stmt->execute([$ufOab]);
+        if (!$stmt->fetch()) {
+            self::showError('UF inválida', 'Selecione uma UF válida para a OAB.', '/register', 'warning');
             exit;
         }
 
@@ -94,8 +101,22 @@ class AuthController
     {
         global $pdo;
 
-        $email = $_POST['email'] ?? '';
-        $senha = $_POST['senha'] ?? '';
+        $email = strtolower(trim((string) ($_POST['email'] ?? '')));
+        $senha = (string) ($_POST['senha'] ?? '');
+
+
+        $perfilAcesso = $_POST['perfil_acesso'] ?? '';
+        $mapaPerfis = [
+            'admin' => 1,
+            'advogado' => 2,
+            'cliente' => 3,
+        ];
+
+        if (!array_key_exists($perfilAcesso, $mapaPerfis)) {
+            self::showError('Perfil de acesso inválido', 'Selecione o tipo de acesso para continuar.', '/login');
+            exit;
+        }
+
 
 
         $perfilAcesso = $_POST['perfil_acesso'] ?? '';
