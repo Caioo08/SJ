@@ -211,24 +211,24 @@ a.btn:hover {
                 <div class="form-row">
                     <div class="form-group">
                         <label for="cpf_cnpj">CPF/CNPJ</label>
-                        <input type="text" id="cpf_cnpj" name="cpf_cnpj" placeholder="000.000.000-00">
+                        <input type="text" id="cpf_cnpj" name="cpf_cnpj" placeholder="000.000.000-00" maxlength="18" required>
                     </div>
 
                     <div class="form-group">
                         <label for="rg">RG</label>
-                        <input type="text" id="rg" name="rg" placeholder="00.000.000-0">
+                        <input type="text" id="rg" name="rg" placeholder="00.000.000-0" required>
                     </div>
                 </div>
 
                 <div class="form-row">
                     <div class="form-group">
                         <label for="nacionalidade">Nacionalidade</label>
-                        <input type="text" id="nacionalidade" name="nacionalidade" placeholder="Brasileiro(a)" value="Brasileiro(a)">
+                        <input type="text" id="nacionalidade" name="nacionalidade" placeholder="Brasileiro(a)" value="" required>
                     </div>
 
                     <div class="form-group">
                         <label for="estado_civil">Estado Civil</label>
-                        <select id="estado_civil" name="estado_civil">
+                        <select id="estado_civil" name="estado_civil" required>
                             <option value="">Selecione</option>
                             <option value="solteiro">Solteiro(a)</option>
                             <option value="casado">Casado(a)</option>
@@ -242,19 +242,19 @@ a.btn:hover {
                 <div class="form-row">
                     <div class="form-group">
                         <label for="email">Email</label>
-                        <input type="email" id="email" name="email" placeholder="cliente@exemplo.com">
+                        <input type="email" id="email" name="email" placeholder="cliente@exemplo.com" required>
                     </div>
 
                     <div class="form-group">
                         <label for="celular">Celular</label>
-                        <input type="text" id="celular" name="celular" placeholder="(00) 00000-0000">
+                        <input type="text" id="celular" name="celular" placeholder="(00) 00000-0000" required>
                     </div>
                 </div>
 
                 <div class="form-row">
                     <div class="form-group">
                         <label for="telefone">Telefone</label>
-                        <input type="text" id="telefone" name="telefone" placeholder="(00) 0000-0000">
+                        <input type="text" id="telefone" name="telefone" placeholder="(00) 0000-0000" required>
                     </div>
                 </div>
 
@@ -274,7 +274,7 @@ a.btn:hover {
                 <div class="form-row">
                     <div class="form-group cep-group">
                         <label for="cep">CEP</label>
-                        <input type="text" id="cep" name="cep" placeholder="00000-000" maxlength="9">
+                        <input type="text" id="cep" name="cep" placeholder="00000-000" maxlength="9" required>
                         <span class="cep-loading" id="cepLoading">🔄 Buscando...</span>
                     </div>
                 </div>
@@ -282,14 +282,14 @@ a.btn:hover {
                 <div class="form-row">
                     <div class="form-group full-width">
                         <label for="endereco">Endereço</label>
-                        <input type="text" id="endereco" name="endereco" placeholder="Rua, Avenida...">
+                        <input type="text" id="endereco" name="endereco" placeholder="Rua, Avenida..." required>
                     </div>
                 </div>
 
                 <div class="form-row">
                     <div class="form-group">
                         <label for="numero">Número</label>
-                        <input type="text" id="numero" name="numero" placeholder="123">
+                        <input type="text" id="numero" name="numero" placeholder="123" required>
                     </div>
 
                     <div class="form-group">
@@ -301,19 +301,19 @@ a.btn:hover {
                 <div class="form-row">
                     <div class="form-group">
                         <label for="bairro">Bairro</label>
-                        <input type="text" id="bairro" name="bairro" placeholder="Nome do bairro">
+                        <input type="text" id="bairro" name="bairro" placeholder="Nome do bairro" required>
                     </div>
 
                     <div class="form-group">
                         <label for="cidade">Cidade</label>
-                        <input type="text" id="cidade" name="cidade" placeholder="Nome da cidade">
+                        <input type="text" id="cidade" name="cidade" placeholder="Nome da cidade" required>
                     </div>
                 </div>
 
                 <div class="form-row">
                     <div class="form-group">
                         <label for="uf">UF</label>
-                        <select id="uf" name="uf">
+                        <select id="uf" name="uf" required>
                             <option value="">Selecione</option>
                             <option value="AC">AC</option>
                             <option value="AL">AL</option>

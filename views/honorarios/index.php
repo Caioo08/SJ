@@ -262,7 +262,6 @@ body{
         <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;">
             <h1 style="margin:0;color:var(--acc);">💼 Honorários e Contratos</h1>
             <div style="display:flex;gap:8px;">
-                <a class="btn btn-outline" href="/dashboard">Voltar ao dashboard</a>
                 <a class="btn" href="/honorarios/novo">+ Novo contrato</a>
             </div>
         </div>

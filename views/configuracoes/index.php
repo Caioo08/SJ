@@ -522,7 +522,26 @@ select option {
                             <?php endforeach; ?>
                         </select>
                     </div>
+
+                    <div class="form-group">
+                        <label for="nacionalidade">Nacionalidade</label>
+                        <input type="text" id="nacionalidade" name="nacionalidade" value="<?= htmlspecialchars($usuario['nacionalidade'] ?? '') ?>" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Estado Civil</label>
+                            <select name="estado_civil">
+                                <option value="">Selecione</option>
+                                <option value="solteiro" <?= ($usuario['estado_civil'] ?? '') == 'solteiro' ? 'selected' : '' ?>>Solteiro(a)</option>
+                                <option value="casado" <?= ($usuario['estado_civil'] ?? '') == 'casado' ? 'selected' : '' ?>>Casado(a)</option>
+                                <option value="divorciado" <?= ($usuario['estado_civil'] ?? '') == 'divorciado' ? 'selected' : '' ?>>Divorciado(a)</option>
+                                <option value="viuvo" <?= ($usuario['estado_civil'] ?? '') == 'viuvo' ? 'selected' : '' ?>>Viúvo(a)</option>
+                                <option value="uniao_estavel" <?= ($usuario['estado_civil'] ?? '') == 'uniao_estavel' ? 'selected' : '' ?>>União Estável</option>
+                            </select>
+                    </div>
                 </div>
+
+                
 
                 <div style="margin-top: 20px;">
                     <button type="submit" class="btn btn-primary">💾 Salvar Alterações</button>

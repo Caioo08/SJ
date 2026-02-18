@@ -182,11 +182,7 @@ body {
         <?php endif; ?>, 
         vem pelo presente instrumento particular de mandato, nomeia e constitui seu bastante e legítimo procurador, 
         <strong><?= strtoupper(htmlspecialchars($advogado['nome'])) ?></strong>, 
-        brasileiro, 
-        <?php
-        // Tentar determinar estado civil do advogado, se disponível no futuro
-        echo 'casado, ';
-        ?>
+        <?= htmlspecialchars($advogado['nacionalidade'] ?: '____________') ?>, <?= htmlspecialchars($advogado['estado_civil'] ?: '__') ?>,
         advogado, regularmente inscrito na OAB/<?= htmlspecialchars($advogado['uf_sigla']) ?> 
         sob o nº <?= htmlspecialchars($advogado['oab']) ?>, 
         com escritório 

@@ -253,7 +253,7 @@ a.btn:hover {
                 
                 <div class="form-group">
                     <label for="numero_processo">Número do Processo</label>
-                    <input type="text" id="numero_processo" name="numero_processo" placeholder="Ex: 0000000-00.0000.0.00.0000">
+                    <input type="text" id="numero_processo" name="numero_processo" placeholder="Ex: 0000000-00.0000.0.00.0000" required>
                     <span class="help-text">Opcional - Número CNJ do processo</span>
                 </div>
 

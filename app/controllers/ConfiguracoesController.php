@@ -76,8 +76,10 @@ class ConfiguracoesController
         $email = trim($_POST['email'] ?? '');
         $oab = trim($_POST['oab'] ?? '');
         $uf_id = $_POST['uf_id'] ?? '';
+        $nacionalidade = trim($_POST['nacionalidade'] ?? '');
+        $estado_civil = trim($_POST['estado_civil'] ?? '');
 
-        if (empty($nome) || empty($email) || empty($oab) || empty($uf_id)) {
+        if (empty($nome) || empty($email) || empty($oab) || empty($uf_id) || empty($nacionalidade) || empty($estado_civil)) {
             die("Todos os campos são obrigatórios.");
         }
 
@@ -95,6 +97,8 @@ class ConfiguracoesController
                     email = :email, 
                     oab = :oab, 
                     uf_id = :uf_id,
+                    nacionalidade = :nacionalidade,
+                    estado_civil = :estado_civil,
                     atualizado_em = CURRENT_TIMESTAMP
                 WHERE id = :id
             ");
@@ -104,7 +108,9 @@ class ConfiguracoesController
                 ':email' => $email,
                 ':oab' => $oab,
                 ':uf_id' => $uf_id,
-                ':id' => $usuario_id
+                ':id' => $usuario_id,
+                ':nacionalidade' => $nacionalidade,
+                ':estado_civil' => $estado_civil
             ]);
 
             // Atualizar nome na sessão

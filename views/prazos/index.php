@@ -286,7 +286,7 @@ form {
 
   <div class="stats">
     <div class="stat"><strong><?= (int)($stats['abertos'] ?? 0) ?></strong><div class="meta">Abertos</div></div>
-    <div class="stat"><strong><?= (int)($stats['atrasados'] ?? 0) ?></strong><div class="meta">Atrasados</div></div>
+    <div class="stat"><strong><?= (int)($stats['atrasados'] ?? 0)?></strong><div class="meta">Atrasados</div></div>
     <div class="stat"><strong><?= (int)($stats['concluidos'] ?? 0) ?></strong><div class="meta">Concluídos</div></div>
   </div>
 

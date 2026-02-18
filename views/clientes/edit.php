@@ -173,7 +173,7 @@ a.btn:hover {
 <div class="form-row">
 <div class="form-group">
 <label>CPF/CNPJ</label>
-<input type="text" id="cpf_cnpj" name="cpf_cnpj" value="<?= htmlspecialchars($cliente['cpf_cnpj'] ?? '') ?>">
+<input type="text" id="cpf_cnpj" name="cpf_cnpj" value="<?= htmlspecialchars($cliente['cpf_cnpj'] ?? '') ?>" maxlength="18">
 </div>
 
 <div class="form-group">
