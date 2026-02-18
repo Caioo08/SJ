@@ -23,7 +23,7 @@
     --danger: #f87171;
 }
 
-* { box-sizing: border-box; font-family: 'Inter', sans-serif; }
+* { box-sizing: border-box; font-family: 'Inter', sans-serif;  }
 
 body {
     margin:0;

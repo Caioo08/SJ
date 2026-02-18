@@ -28,6 +28,11 @@ class Csrf
         $sessionToken = $_SESSION['csrf_token'] ?? '';
         $requestToken = $_POST['csrf_token'] ?? '';
 
+        // Fallback: se não vier no POST, aceitar token enviado via cabeçalho (ex: X-CSRF-Token)
+        if (!is_string($requestToken) || $requestToken === '') {
+            $requestToken = $_SERVER['HTTP_X_CSRF_TOKEN'] ?? $_SERVER['HTTP_X_CSRF'] ?? $_SERVER['HTTP_X_XSRF_TOKEN'] ?? '';
+        }
+
         if (!is_string($sessionToken) || !is_string($requestToken)) {
             return false;
         }

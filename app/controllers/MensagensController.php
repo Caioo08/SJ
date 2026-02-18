@@ -93,7 +93,8 @@ class MensagensController
             exit;
         }
 
-        if (mb_strlen($mensagem) > 4000) {
+        $mensagem_len = function_exists('mb_strlen') ? mb_strlen($mensagem) : strlen($mensagem);
+        if ($mensagem_len > 4000) {
             header('Location: /mensagens?cliente_id=' . $cliente_id . '&erro=mensagem_grande');
             exit;
         }

@@ -14,10 +14,42 @@ header('Referrer-Policy: strict-origin-when-cross-origin');
 header("Content-Security-Policy: frame-ancestors 'self'");
 
 require_once '../app/helpers/Csrf.php';
+require_once '../app/helpers/Audit.php';
+
+// Transformar erros em exceções e registrar exceções fatais para diagnóstico
+set_error_handler(function($severity, $message, $file, $line) {
+    if (!(error_reporting() & $severity)) {
+        return;
+    }
+    throw new ErrorException($message, 0, $severity, $file, $line);
+});
+
+set_exception_handler(function($e) {
+    Audit::registrar('Unhandled Exception', null, null, $e->getMessage() . ' in ' . $e->getFile() . ':' . $e->getLine());
+    http_response_code(500);
+    echo "Erro interno do servidor. Tente novamente mais tarde.";
+    exit;
+});
+
+register_shutdown_function(function() {
+    $err = error_get_last();
+    if ($err && in_array($err['type'], [E_ERROR, E_CORE_ERROR, E_COMPILE_ERROR, E_PARSE])) {
+        Audit::registrar('Fatal error', null, null, $err['message'] . ' in ' . $err['file'] . ':' . $err['line']);
+        http_response_code(500);
+        echo "Erro interno do servidor. Tente novamente mais tarde.";
+        exit;
+    }
+});
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!Csrf::verifyRequest()) {
         $uriPost = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';
+
+        // Registrar diagnóstico para ajudar debug (não inclui tokens)
+        $sessTokenExists = isset($_SESSION['csrf_token']) && $_SESSION['csrf_token'] !== '' ? 1 : 0;
+        $postTokenExists = isset($_POST['csrf_token']) && $_POST['csrf_token'] !== '' ? 1 : 0;
+        $hdrTokenExists = (!empty($_SERVER['HTTP_X_CSRF_TOKEN']) || !empty($_SERVER['HTTP_X_CSRF']) || !empty($_SERVER['HTTP_X_XSRF_TOKEN'])) ? 1 : 0;
+        Audit::registrar('CSRF falhou', 'public_index', null, 'uri=' . $uriPost . ' sess=' . $sessTokenExists . ' post=' . $postTokenExists . ' hdr=' . $hdrTokenExists);
 
         if (preg_match('#^/mensagens/enviar/?$#', $uriPost)) {
             header('Location: /mensagens?erro=csrf');

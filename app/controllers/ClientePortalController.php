@@ -75,7 +75,8 @@ class ClientePortalController
             die('Mensagem não pode estar vazia.');
         }
 
-        if (mb_strlen($mensagem) > 4000) {
+        $mensagem_len = function_exists('mb_strlen') ? mb_strlen($mensagem) : strlen($mensagem);
+        if ($mensagem_len > 4000) {
             die('Mensagem excede o limite de 4000 caracteres.');
         }
 
