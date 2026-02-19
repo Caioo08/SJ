@@ -25,68 +25,6 @@ body {
   color: var(--txt);
 }
 
-/* Sidebar */
-.sidebar {
-  position: fixed;
-  left: 0;
-  top: 0;
-  width: 260px;
-  height: 100vh;
-  background: var(--card);
-  border-right: 1px solid var(--bd);
-  padding: 24px 0;
-  overflow-y: auto;
-}
-
-.logo-section {
-  padding: 0 24px 24px;
-  border-bottom: 1px solid var(--bd);
-  margin-bottom: 24px;
-}
-
-.logo-container {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.logo {
-  width: 42px;
-  height: 42px;
-  border-radius: 8px;
-  background: linear-gradient(135deg, #b8860b, #f1c65b);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #0b0b0b;
-  font-weight: 800;
-}
-
-.logo-text {
-  font-size: 18px;
-  font-weight: 700;
-  color: var(--acc);
-}
-
-.nav-menu {
-  list-style: none;
-  padding: 0 12px;
-}
-
-.nav-link {
-  display: flex;
-  gap: 12px;
-  padding: 12px 16px;
-  color: var(--mut);
-  text-decoration: none;
-  border-radius: 8px;
-}
-
-.nav-link:hover,
-.nav-link.active {
-  background: var(--bg2);
-  color: var(--acc);
-}
 
 /* Main Content */
 .main {
@@ -177,7 +115,7 @@ textarea {
 <div class="actions"><button class="btn" type="submit">Atualizar</button><a class="btn btn-outline" href="/prazos">Cancelar</a></div>
 </form></div>
 <?php if (!empty($historico ?? [])): ?>
-<div class="wrap" style="margin-top:16px;">
+<div class="wrap" style="margin-top:16px;"> 
   <h2 style="margin-top:0;">🕘 Histórico de Alterações</h2>
   <?php foreach(($historico ?? []) as $h): ?>
     <div style="border:1px solid var(--bd);border-radius:8px;padding:10px;margin-bottom:8px;">

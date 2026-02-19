@@ -254,7 +254,7 @@ a.btn:hover {
                 <div class="form-row">
                     <div class="form-group">
                         <label for="telefone">Telefone</label>
-                        <input type="text" id="telefone" name="telefone" placeholder="(00) 0000-0000" required>
+                        <input type="text" id="telefone" name="telefone" placeholder="(00) 0000-0000" >
                     </div>
                 </div>
 

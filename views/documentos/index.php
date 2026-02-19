@@ -339,13 +339,13 @@ h1 {
                 </a>
             </li>
             <li class="nav-item">
-                <a href="/processos" class="nav-link">
-                    <span>⚖️</span> Processos
+                <a href="/clientes" class="nav-link">
+                    <span>👥</span> Clientes
                 </a>
             </li>
             <li class="nav-item">
-                <a href="/clientes" class="nav-link">
-                    <span>👥</span> Clientes
+                <a href="/processos" class="nav-link">
+                    <span>⚖️</span> Processos
                 </a>
             </li>
             <li class="nav-item">

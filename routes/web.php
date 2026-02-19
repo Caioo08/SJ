@@ -80,6 +80,7 @@ elseif ($uri === '/dashboard') {
     DashboardController::index();
 }
 
+
 // ==================== PROCESSOS (APENAS ADVOGADOS) ====================
 
 elseif ($uri === '/processos') {

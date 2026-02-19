@@ -27,8 +27,6 @@ body {
   color: var(--txt);
 }
 
-
-
 /* Main Content */
 .main {
   padding: 24px;
@@ -43,7 +41,6 @@ body {
   border-radius: 12px;
   border: 1px solid var(--bd);
 }
-
 
 /* Form Elements */
 label {
@@ -112,17 +109,17 @@ textarea {
     <label>Título*</label><input type="text" name="titulo" required>
     <label>Processo (opcional)</label>
     <select name="processo_id"><option value="">Sem vínculo</option><?php foreach($processos as $proc): ?><option value="<?= $proc['id'] ?>"><?= htmlspecialchars($proc['numero_processo'] ?: ('#'.$proc['id'])) ?> - <?= htmlspecialchars($proc['cliente_nome']) ?></option><?php endforeach; ?></select>
-    <label>Data limite manual</label><input type="datetime-local" name="data_limite">
-    <div class="meta" style="margin-top:6px;">Opcional quando usar cálculo automático abaixo.</div>
-
-    <label>Cálculo automático (dias)</label><input type="number" min="1" name="dias_prazo" placeholder="Ex: 5">
-    <label>Tipo de contagem</label>
-    <select name="tipo_contagem">
-      <option value="corridos" selected>Dias corridos</option>
-      <option value="uteis">Dias úteis (seg-sex)</option>
-    </select>
-    <label>Data base do cálculo</label><input type="datetime-local" name="data_base">
-
+      
+      <label>Data base do cálculo</label><input type="datetime-local" name="data_base">
+      <label>Cálculo automático (dias)</label><input type="number" min="1" name="dias_prazo" placeholder="Ex: 5">
+      <label>Tipo de contagem</label>
+      <select name="tipo_contagem">
+        <option value="corridos" selected>Dias corridos</option>
+        <option value="uteis">Dias úteis (seg-sex)</option>
+      </select>
+      
+      <label>Data limite manual</label><input type="datetime-local" name="data_limite">
+      <div class="meta" style="margin-top:6px;">Opcional quando usar cálculo automático abaixo.</div>
     <label>Prioridade</label><select name="prioridade"><option value="baixa">Baixa</option><option value="media" selected>Média</option><option value="alta">Alta</option></select>
     <label>Descrição</label><textarea name="descricao" rows="4"></textarea>
     <div class="actions"><button class="btn" type="submit">Salvar</button><a class="btn btn-outline" href="/prazos">Cancelar</a></div>

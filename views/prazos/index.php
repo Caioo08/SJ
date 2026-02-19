@@ -264,8 +264,8 @@ form {
   <nav>
     <ul class="nav-menu">
       <li class="nav-item"><a href="/dashboard" class="nav-link"><span>📊</span> Dashboard</a></li>
-      <li class="nav-item"><a href="/processos" class="nav-link"><span>⚖️</span> Processos</a></li>
       <li class="nav-item"><a href="/clientes" class="nav-link"><span>👥</span> Clientes</a></li>
+      <li class="nav-item"><a href="/processos" class="nav-link"><span>⚖️</span> Processos</a></li>
       <li class="nav-item"><a href="/compromissos" class="nav-link"><span>📅</span> Compromissos</a></li>
       <li class="nav-item"><a href="/prazos" class="nav-link active"><span>⏳</span> Prazos</a></li>
       <li class="nav-item"><a href="/honorarios" class="nav-link"><span>💼</span> Honorários</a></li>

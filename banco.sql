@@ -50,11 +50,13 @@ INSERT INTO ufs (sigla, nome) VALUES
 CREATE TABLE usuarios (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nome VARCHAR(150) NOT NULL,
+    nacionalidade varchar(50),
+    estado_civil varchar(50),
     email VARCHAR(150) NOT NULL UNIQUE,
     senha_hash VARCHAR(255) NOT NULL,
     oab VARCHAR(20),
     uf_id INT,
-
+	
     -- Endereço do Escritório
     escritorio_cep VARCHAR(10),
     escritorio_endereco VARCHAR(200),
