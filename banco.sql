@@ -50,6 +50,11 @@ INSERT INTO ufs (sigla, nome) VALUES
 CREATE TABLE usuarios (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nome VARCHAR(150) NOT NULL,
+    cpf VARCHAR(14),
+    data_nascimento DATE,
+    telefone VARCHAR(20),
+	genero ENUM('M','F','O',''),
+    area_atuacao VARCHAR(60),
     nacionalidade varchar(50),
     estado_civil varchar(50),
     email VARCHAR(150) NOT NULL UNIQUE,
@@ -58,6 +63,7 @@ CREATE TABLE usuarios (
     uf_id INT,
 	
     -- Endereço do Escritório
+    nome_escritorio VARCHAR(150),
     escritorio_cep VARCHAR(10),
     escritorio_endereco VARCHAR(200),
     escritorio_numero VARCHAR(10),
@@ -78,7 +84,6 @@ CREATE TABLE usuarios (
     INDEX idx_perfil (perfil_id),
     INDEX idx_ativo (ativo)
 ) ENGINE=InnoDB;
-
 
 -- Usuário administrador padrão (altere a senha após o primeiro acesso)
 INSERT INTO usuarios (nome, email, senha_hash, perfil_id, ativo)

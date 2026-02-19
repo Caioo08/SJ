@@ -526,7 +526,7 @@ body::before {
 
     <div class="form-footer">
       <span class="footer-text">Novo no sistema?</span>
-      <a href="/cadastrar-advogado" class="footer-link">Criar conta de advogado →</a>
+      <a href="/register" class="footer-link">Criar conta de advogado →</a>
     </div>
 
   </div>

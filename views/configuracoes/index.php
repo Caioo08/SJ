@@ -524,6 +524,16 @@ select option {
                     </div>
 
                     <div class="form-group">
+                        <label for="cpf">CPF</label>
+                        <input type="text" id="cpf" name="cpf" value="<?= htmlspecialchars($usuario['cpf'] ?? '') ?>" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="telefone">Telefone/WhatsApp</label>
+                        <input type="text" id="telefone" name="telefone" value="<?= htmlspecialchars($usuario['telefone'] ?? '') ?>" required>
+                    </div>
+
+                    <div class="form-group">
                         <label for="nacionalidade">Nacionalidade</label>
                         <input type="text" id="nacionalidade" name="nacionalidade" value="<?= htmlspecialchars($usuario['nacionalidade'] ?? '') ?>" required>
                     </div>
@@ -539,6 +549,60 @@ select option {
                                 <option value="uniao_estavel" <?= ($usuario['estado_civil'] ?? '') == 'uniao_estavel' ? 'selected' : '' ?>>União Estável</option>
                             </select>
                     </div>
+                    <div class="field">
+                        <label class="field-label" for="genero">Gênero</label>
+                        <select id="genero" name="genero" class="field-input">
+                            <option value="" <?= ($usuario['genero'] ?? '') == '' ? 'selected' : '' ?>>
+                                Prefiro não informar
+                            </option>
+                            <option value="M" <?= ($usuario['genero'] ?? '') == 'M' ? 'selected' : '' ?>>
+                                Masculino
+                            </option>
+                            <option value="F" <?= ($usuario['genero'] ?? '') == 'F' ? 'selected' : '' ?>>
+                                Feminino
+                            </option>
+                            <option value="O" <?= ($usuario['genero'] ?? '') == 'O' ? 'selected' : '' ?>>
+                                Outro
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="field">
+                        <label class="field-label" for="area_atuacao">Área de atuação</label>
+                        <select id="area_atuacao" name="area_atuacao" class="field-input">
+                            <option value="" <?= ($usuario['area_atuacao'] ?? '') == '' ? 'selected' : '' ?>>
+                                Selecione
+                            </option>
+                            <option value="civil" <?= ($usuario['area_atuacao'] ?? '') == 'civil' ? 'selected' : '' ?>>
+                                Direito Civil
+                            </option>
+                            <option value="trabalhista" <?= ($usuario['area_atuacao'] ?? '') == 'trabalhista' ? 'selected' : '' ?>>
+                                Direito Trabalhista
+                            </option>
+                            <option value="criminal" <?= ($usuario['area_atuacao'] ?? '') == 'criminal' ? 'selected' : '' ?>>
+                                Direito Criminal
+                            </option>
+                            <option value="empresarial" <?= ($usuario['area_atuacao'] ?? '') == 'empresarial' ? 'selected' : '' ?>>
+                                Direito Empresarial
+                            </option>
+                            <option value="tributario" <?= ($usuario['area_atuacao'] ?? '') == 'tributario' ? 'selected' : '' ?>>
+                                Direito Tributário
+                            </option>
+                            <option value="familia" <?= ($usuario['area_atuacao'] ?? '') == 'familia' ? 'selected' : '' ?>>
+                                Direito de Família
+                            </option>
+                            <option value="previdenciario" <?= ($usuario['area_atuacao'] ?? '') == 'previdenciario' ? 'selected' : '' ?>>
+                                Previdenciário
+                            </option>
+                            <option value="imobiliario" <?= ($usuario['area_atuacao'] ?? '') == 'imobiliario' ? 'selected' : '' ?>>
+                                Direito Imobiliário
+                            </option>
+                            <option value="outro" <?= ($usuario['area_atuacao'] ?? '') == 'outro' ? 'selected' : '' ?>>
+                                Outro
+                            </option>
+                        </select>
+                    </div>
+
                 </div>
 
                 
@@ -562,6 +626,12 @@ select option {
     <form action="/configuracoes/atualizar-escritorio" method="POST">
             <?= Csrf::field() ?>
         <div class="form-grid">
+            <div class="form-group">
+                <label for="nome_escritorio">Nome do Escritório</label>
+                <input type="text" id="nome_escritorio" name="nome_escritorio" value="<?= htmlspecialchars($usuario['nome_escritorio'] ?? '') ?>" required>
+            </div>
+
+
             <div class="form-group cep-group" style="position: relative;">
                 <label for="escritorio_cep">CEP</label>
                 <input type="text" id="escritorio_cep" name="escritorio_cep" 
@@ -708,6 +778,46 @@ select option {
 </div>
 
 <script>
+document.getElementById('cpf').addEventListener('input', function(e) {
+    let value = e.target.value.replace(/\D/g, '');
+
+    // Limita a 11 dígitos
+    value = value.slice(0, 11);
+
+    // Aplica a máscara CPF: 000.000.000-00
+    value = value.replace(/(\d{3})(\d)/, '$1.$2');
+    value = value.replace(/(\d{3})(\d)/, '$1.$2');
+    value = value.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+
+    e.target.value = value;
+});
+
+const telefoneInput = document.getElementById('telefone');
+
+if (telefoneInput) {
+    telefoneInput.addEventListener('input', function(e) {
+        let value = e.target.value.replace(/\D/g, '');
+
+        // Limita a 11 números (DDD + 9 dígitos)
+        value = value.slice(0, 11);
+
+        // Aplica máscara
+        if (value.length > 0) {
+            value = value.replace(/^(\d{2})(\d)/g, '($1) $2');
+        }
+
+        if (value.length > 10) {
+            // Celular com 9 dígitos
+            value = value.replace(/(\d{5})(\d{4})$/, '$1-$2');
+        } else {
+            // Telefone fixo (8 dígitos)
+            value = value.replace(/(\d{4})(\d{4})$/, '$1-$2');
+        }
+
+        e.target.value = value;
+    });
+}
+
 function openDeleteModal() {
     document.getElementById('deleteModal').classList.add('show');
 }

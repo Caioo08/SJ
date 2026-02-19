@@ -78,8 +78,11 @@ class ConfiguracoesController
         $uf_id = $_POST['uf_id'] ?? '';
         $nacionalidade = trim($_POST['nacionalidade'] ?? '');
         $estado_civil = trim($_POST['estado_civil'] ?? '');
+        $area_atuacao = trim($_POST['area_atuacao'] ?? '');
+        $cpf = trim($_POST['cpf'] ?? '');
+        $genero = trim($_POST['genero'] ?? '');
 
-        if (empty($nome) || empty($email) || empty($oab) || empty($uf_id) || empty($nacionalidade) || empty($estado_civil)) {
+        if (empty($nome) || empty($email) || empty($oab) || empty($uf_id) || empty($nacionalidade) || empty($estado_civil) || empty($area_atuacao) || empty($cpf) || empty($genero)) {
             die("Todos os campos são obrigatórios.");
         }
 
@@ -99,6 +102,9 @@ class ConfiguracoesController
                     uf_id = :uf_id,
                     nacionalidade = :nacionalidade,
                     estado_civil = :estado_civil,
+                    area_atuacao = :area_atuacao,
+                    cpf = :cpf,
+                    genero = :genero,
                     atualizado_em = CURRENT_TIMESTAMP
                 WHERE id = :id
             ");
@@ -110,7 +116,10 @@ class ConfiguracoesController
                 ':uf_id' => $uf_id,
                 ':id' => $usuario_id,
                 ':nacionalidade' => $nacionalidade,
-                ':estado_civil' => $estado_civil
+                ':estado_civil' => $estado_civil,
+                ':area_atuacao' => $area_atuacao,
+                ':cpf' => $cpf,
+                ':genero' => $genero
             ]);
 
             // Atualizar nome na sessão
@@ -257,6 +266,7 @@ class ConfiguracoesController
     $escritorio_bairro = trim($_POST['escritorio_bairro'] ?? '');
     $escritorio_cidade = trim($_POST['escritorio_cidade'] ?? '');
     $escritorio_uf = trim($_POST['escritorio_uf'] ?? '');
+    $nome_escritorio = trim($_POST['nome_escritorio'] ?? '');
 
     try {
         $stmt = $pdo->prepare("
@@ -268,6 +278,7 @@ class ConfiguracoesController
                 escritorio_bairro = :bairro,
                 escritorio_cidade = :cidade,
                 escritorio_uf = :uf,
+                nome_escritorio = :nome_escritorio,
                 atualizado_em = CURRENT_TIMESTAMP
             WHERE id = :id
         ");
@@ -280,7 +291,8 @@ class ConfiguracoesController
             ':bairro' => $escritorio_bairro,
             ':cidade' => $escritorio_cidade,
             ':uf' => $escritorio_uf,
-            ':id' => $usuario_id
+            ':id' => $usuario_id,
+            ':nome_escritorio' => $nome_escritorio
         ]);
 
         Audit::registrar('Endereço do escritório atualizado', 'usuarios', (int) $usuario_id, null);
